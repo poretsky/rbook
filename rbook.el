@@ -74,6 +74,14 @@ actual sampling rate, but varying this value we can change playing speed."
   :prefix "rbook-"
   :group 'rbook)
 
+(defcustom rbook-split-by-blank-lines 0
+  "*If this value is greater than 0, it defines number of blank lines
+which causes splitting output. 0 denotes no splitting by blank lines.
+Lines filled by non-pronunciable symbols (such as punctuations)
+are also treated as blank."
+  :group 'rbook-audiobook
+  :type 'integer)
+
 (defcustom rbook-split-by-time nil
   "*Whether to split output by playing time."
   :group 'rbook-audiobook
@@ -415,10 +423,13 @@ this process will generate silence for given number of empty lines."
 			 (when rbook-split-enabled
 			   (setq rbook-switch-chunk t))
 			 (setq rbook-split-enabled nil))
-		     (setq rbook-split-enabled t)
-		     (when (and rbook-split-by-time
-				(rbook-test-current-chunk-length))
-		       (setq rbook-switch-chunk t))))
+		     (when (and rbook-split-enabled
+				(or (and (> rbook-split-by-blank-lines 0)
+					 (>= blank rbook-split-by-blank-lines))
+				    (and rbook-split-by-time
+					 (rbook-test-current-chunk-length))))
+		       (setq rbook-switch-chunk t))
+		     (setq rbook-split-enabled t)))
 		 (rbook-run-tts-process
 		  (if rbook-switch-chunk
 		      rbook-delay-lines
