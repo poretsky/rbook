@@ -44,6 +44,20 @@ progress.au, task-done.au, - следует разместить в каталоге
 (global-set-key (kbd "C-c t") 'rbook-show-time)
 (global-set-key (kbd "C-c c") 'rbook-customize)
 
+Разумеется, можно использовать и другие горячие клавиши. А если не
+полениться, то к этому можно добавить еще и такое:
+
+(setq rbook-menu (make-sparse-keymap "RBOOK"))
+(define-key global-map [menu-bar tools RBOOK] (cons "Book reader" rbook-menu))
+(define-key global-map [menu-bar tools RBOOK customize] '("Customize parameters" . rbook-customize))
+(define-key global-map [menu-bar tools RBOOK show-time] '("Show processed time" . rbook-show-time))
+(define-key global-map [menu-bar tools RBOOK make-audio-book] '("Make audio book" . rbook-make-audio-book))
+(define-key global-map [menu-bar tools RBOOK read-bookmark] '("Read text from bookmark" . rbook-read-bookmark))
+(define-key global-map [menu-bar tools RBOOK read-text] '("Read text from cursor" . rbook-read-text))
+
+В этом случае программа будет доступна также и через меню. А именно, в
+разделе "Tools" появится пункт "Book reader".
+
 
 ИСПОЛЬЗОВАНИЕ
 
