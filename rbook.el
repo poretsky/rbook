@@ -427,6 +427,7 @@ this process will generate silence for given number of empty lines."
 				(or (and (> rbook-split-by-blank-lines 0)
 					 (>= blank rbook-split-by-blank-lines))
 				    (and rbook-split-by-time
+					 rbook-encoding-process-ready
 					 (rbook-test-current-chunk-length))))
 		       (setq rbook-switch-chunk t))
 		     (setq rbook-split-enabled t)))
