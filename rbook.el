@@ -47,6 +47,9 @@
 (defvar rbook-encoding-bitrate 32
   "*Encoding bitrate in kbps.")
 
+(defvar rbook-eliminate-punctuations t
+  "*Don't speak punctuations at all.")
+
 (defvar rbook-delay-lines 3
   "*Maximum number of empty lines producing pause.")
 
@@ -118,6 +121,10 @@ and produce an appropriate file.")
       (goto-char (point-min))
       (while (re-search-forward "\\(\\w\\)-[ \t]*\n[ \t]*\\(\\w\\)" nil t)
 	(replace-match "\\1\\2" nil nil))
+      (when rbook-eliminate-punctuations
+	(subst-char-in-region (point-min) (point-max) ?\" ?  t)
+	(subst-char-in-region (point-min) (point-max) ?\( ?  t)
+	(subst-char-in-region (point-min) (point-max) ?\) ?  t))
       (subst-char-in-region (point-min) (point-max) ?\n ?  t)
       (goto-char (point-min))
       (while (re-search-forward "[ \f\t]+" nil t)
