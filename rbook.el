@@ -32,59 +32,116 @@
 (eval-when-compile (require 'cl))
 (require 'bookmark)
 
-(defvar rbook-speech-volume 0.8
-  "*Generated speech volume.")
 
-(defvar rbook-speech-pitch 0.0
-  "*Generated speech pitch.")
+;; Customizations
 
-(defvar rbook-speech-rate 0.0
-  "*Generated speech rate.")
+(defgroup rbook nil
+  "Rbook: Book reader"
+  :prefix "rbook-"
+  :group 'applications)
 
-(defvar rbook-speech-sampling 10300
-  "*How to treat generated speech sampling rate.")
+(defgroup rbook-speech nil
+  "Speech parameters"
+  :prefix "rbook-speech-"
+  :group 'rbook)
 
-(defvar rbook-encoding-bitrate 32
-  "*Encoding bitrate in kbps.")
+(defcustom rbook-speech-volume 0.8
+  "*Generated speech volume. Reasonable values range from 0.0 to 1.0.
+For audio book producing 1.0 is recommended."
+  :group 'rbook-speech
+  :type 'number)
 
-(defvar rbook-eliminate-punctuations t
-  "*Don't speak punctuations at all.")
+(defcustom rbook-speech-pitch 0.0
+  "*Generated speech pitch. Reasonable values range from 0.0 to 1.0.
+The greater value causes higher pitch."
+  :group 'rbook-speech
+  :type 'number)
 
-(defvar rbook-delay-lines 3
-  "*Maximum number of empty lines producing pause.")
+(defcustom rbook-speech-rate 0.0
+  "*Generated speech rate. Reasonable values range from 0.0 to 1.0.
+The greater value causes slower speech."
+  :group 'rbook-speech
+  :type 'number)
 
-(defvar rbook-delay-factor 20
-  "*One empty line silence length in hundredth of second.")
+(defcustom rbook-speech-sampling 10300
+  "*How to treat generated speech sampling rate. In fact it doesn't affect
+actual sampling rate, but varying this value we can change playing speed."
+  :group 'rbook-speech
+  :type 'integer)
+
+(defgroup rbook-audiobook nil
+  "Producing audio books"
+  :prefix "rbook-"
+  :group 'rbook)
+
+(defcustom rbook-split-by-time nil
+  "*Whether to split output by playing time."
+  :group 'rbook-audiobook
+  :type 'boolean)
+
+(defcustom rbook-output-chunk-limit 300
+  "*Time limit of output chunks in seconds.
+When splitting output is not requested, this value defines
+how frequently the progress message should be displayed."
+  :group 'rbook-audiobook
+  :type 'integer)
+
+(defcustom rbook-chapter-regexp "[ \f\t]*\\(ημαχα[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
+  "*Regexp to match chapter header."
+  :group 'rbook-audiobook
+  :type 'integer)
+
+(defcustom rbook-mp3-bitrate 32
+  "*Encoding bitrate in kbps."
+  :group 'rbook-audiobook
+  :type 'integer)
+
+(defcustom rbook-eliminate-punctuations t
+  "*Whether to iliminate speaking of some punctuations,
+such as quotes, parentheses and so on."
+  :group 'rbook
+  :type 'boolean)
+
+(defcustom rbook-delay-lines 3
+  "*Maximum number of empty lines producing pause."
+  :group 'rbook
+  :type 'integer)
+
+(defcustom rbook-delay-factor 20
+  "*One empty line silence length in hundredth of second."
+  :group 'rbook
+  :type 'integer)
+
+(defcustom rbook-default-bookmark "book"
+  "*Default bookmark to start reading from."
+  :group 'rbook
+  :type 'string)
+
+(defun rbook-customize ()
+  "Customize Rbook parameters."
+  (interactive)
+  (customize-group 'rbook))
+
+
+(defvar rbook-output-files-extension ".mp3"
+  "Extension to use for output files.")
 
 (defvar rbook-tts-program "/usr/local/lib/rbook/speak"
   "Program used by rbook for tts sakes.
 These program should accept text on stdin and produce speech output.")
 
-(defvar rbook-encoding-program "/usr/local/lib/rbook/mp3"
-  "Program used by rbook for sound encoding.
-These program should accept sound stream on stdin
-and produce an appropriate file.")
+(defvar rbook-mp3-program "/usr/local/lib/rbook/mp3"
+  "Program used by rbook for producing audio book in MP3 format.
+These program should accept sound stream on stdin and produce an mp3-file.")
 
 (defvar rbook-sound-play-program "/usr/local/lib/rbook/play"
-  "*Program used to play sounds.")
+  "Program used to play audio icons.")
 
 (defvar rbook-encoding-done-sound "/usr/local/lib/rbook/task-done.au"
-  "*Sound file to play when encoding process finishes.")
+  "Sound file to play when encoding process finishes.")
 
 (defvar rbook-encoding-progress-sound "/usr/local/lib/rbook/progress.au"
-  "*Sound file to play whith progress messages.")
-
-(defvar rbook-output-chunk-limit 300
-  "*Time limit of output chunks.")
-
-(defvar rbook-split-by-time nil
-  "*Whether to split output by playing time.")
-
-(defvar rbook-chapter-regexp "[ \f\t]*\\(ημαχα[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
-  "*Regexp to match chapter header.")
-
-(defvar rbook-output-files-extension ".mp3"
-  "*File extension to use for output files.")
+  "Sound file to play whith progress messages.")
 
 (defun rbook-tts-args ()
   "This function returns list of arguments for the TTS program."
@@ -306,7 +363,7 @@ this process will generate silence for given number of empty lines."
   (setq rbook-encoding-process
 	(let ((process-connection-type nil))
 	  (start-process "rbook-encoding" nil
-			 rbook-encoding-program
+			 rbook-mp3-program
 			 "-b" (number-to-string rbook-encoding-bitrate)
 			 "-f" (number-to-string
 			       (/ rbook-speech-sampling 1000.0))
@@ -343,7 +400,7 @@ depending on necessity to split output."
 	(file-name-as-directory path)
       (concat (directory-file-name path) rbook-output-files-extension))))
 
-(defun rbook-make-sound-files (&optional split path)
+(defun rbook-make-audio-book (&optional split path)
   "Make sound files from the text in the current buffer from current position.
 If split argument is not `nil' then output will be split by separate chunks.
 In this case split denotes the number of the first chunk."
@@ -401,10 +458,6 @@ In this case split denotes the number of the first chunk."
 	(goto-char (setq start (match-end 0)))
 	(rbook-delay (1- (count-lines (match-beginning 0)
 				      (match-end 0))))))))
-
-
-(defvar rbook-default-bookmark "book"
-  "*Default bookmark to start reading from.")
 
 
 (defun rbook-read-bookmark (bmk)
