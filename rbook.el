@@ -299,7 +299,7 @@ where current output chunk has started.")
 
 (defun rbook-evaluate-size ()
   "Calculate size of produced sound files in kb."
-  (round (/ (* rbook-processed-amount rbook-encoding-bitrate)
+  (round (/ (* rbook-processed-amount rbook-mp3-bitrate)
 	    (* rbook-speech-sampling 8))))
 
 (defun rbook-show-time ()
@@ -378,7 +378,7 @@ this process will generate silence for given number of empty lines."
 	(let ((process-connection-type nil))
 	  (start-process "rbook-encoding" nil
 			 rbook-mp3-program
-			 "-b" (number-to-string rbook-encoding-bitrate)
+			 "-b" (number-to-string rbook-mp3-bitrate)
 			 "-f" (number-to-string
 			       (/ rbook-speech-sampling 1000.0))
 			 "-v" (number-to-string rbook-mp3-volume)
