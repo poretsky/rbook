@@ -382,7 +382,7 @@ where current output chunk has started.")
 (defun rbook-show-time ()
   "Show playing time of already processed text."
   (interactive)
-  (message "Processed %s of playing time.\n" (rbook-evaluate-time)))
+  (message "Processed %s of playing time." (rbook-evaluate-time)))
 
 (defun rbook-run-tts-process (&optional silence)
   "Run TTS process for current buffer.
@@ -487,7 +487,7 @@ this process will generate silence for given number of empty lines."
        (kill-buffer rbook-exchange-buffer)
        (setq rbook-encoding-process nil)
        (message
-	"Book encoding has %sTotal playing time = %s (%d kb).\n"
+	"Book encoding has %sTotal playing time = %s (%d kb)."
 	str (rbook-evaluate-time) (rbook-evaluate-size)))))
   (setq rbook-current-chunk-start-position rbook-processed-amount)
   (setq rbook-encoding-process-ready t))
