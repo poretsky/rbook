@@ -35,6 +35,9 @@
 (defvar rbook-speech-volume 0.8
   "*Generated speech volume.")
 
+(defvar rbook-speech-pitch 0.0
+  "*Generated speech pitch.")
+
 (defvar rbook-speech-rate 0.0
   "*Generated speech rate.")
 
@@ -76,6 +79,7 @@ These program should accept text on stdin and produce speech output.")
 			   rbook-tts-program
 			   nil nil nil
 			   "-v" (number-to-string rbook-speech-volume)
+			   "-p" (number-to-string rbook-speech-pitch)
 			   "-r" (number-to-string rbook-speech-rate)
 			   "-f" (number-to-string rbook-speech-sampling)))))
 

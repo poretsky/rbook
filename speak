@@ -6,17 +6,19 @@
 #
 # The flag "-s" followed by a number means silence
 # for the requested number of hundredth of second.
-# -v <value> defines speech volume. Value must be between 0 and 1.
-# -r <value> defines speech rate. Value must be between 0 and 1.
+# -v <value> -- Set speech volume. Value must be between 0 and 1.
+# -p <value> -- Set pitch. Value must be between 0 and 1.
+# -r <value> -- Set speech rate. Value must be between 0 and 1.
 # -f <value> defines treatment of sampling frequency in Hz.
 
 # Default values of speech parameters:
 VOLUME=0.8
 FREQUENCY=10300
 RATE=0.0
+PITCH=0.0
 
 # Commands to use for actual tasks accomplishing:
-sndgen='ru_tts -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words'
+sndgen='ru_tts -p $PITCH -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words'
 sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp'
 
 # Command line parsing:
@@ -29,13 +31,16 @@ do case $1 in
      -v) shift
          VOLUME=$1
          ;;
+     -p) shift
+         PITCH=$1
+         ;;
      -r) shift
          RATE=$1
          ;;
      -f) shift
          FREQUENCY=$1
          ;;
-      *) shift
+      *) exit 1
          ;;
    esac
    shift
