@@ -122,6 +122,7 @@ and produce an appropriate file.")
       (while (re-search-forward "\\(\\w\\)-[ \t]*\n[ \t]*\\(\\w\\)" nil t)
 	(replace-match "\\1\\2" nil nil))
       (when rbook-eliminate-punctuations
+	(subst-char-in-region (point-min) (point-max) ?* ?  t)
 	(subst-char-in-region (point-min) (point-max) ?\" ?  t)
 	(subst-char-in-region (point-min) (point-max) ?\( ?  t)
 	(subst-char-in-region (point-min) (point-max) ?\) ?  t))
