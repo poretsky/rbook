@@ -32,11 +32,24 @@
 (eval-when-compile (require 'cl))
 (require 'bookmark)
 
+(defvar rbook-speech-volume 0.8
+  "*Generated speech volume.")
+
+(defvar rbook-speech-rate 0.0
+  "*Generated speech rate.")
+
+(defvar rbook-speech-sampling 10300
+  "*How to treat generated speech sampling rate.")
+
 (defvar rbook-delay-lines 3
   "*Maximum number of empty lines producing pause.")
 
 (defvar rbook-delay-factor 20
   "*One empty line silence length in hundredth of second.")
+
+(defvar rbook-tts-program "/usr/local/bin/speak"
+  "Program used by rbook for tts sakes.
+These program should accept text on stdin and produce speech output.")
 
 
 (defun rbook-delay (n)
@@ -44,11 +57,6 @@
   (call-process rbook-tts-program nil nil nil "-s"
 		(number-to-string
 		 (* rbook-delay-factor (min n rbook-delay-lines)))))
-
-
-(defvar rbook-tts-program "/usr/local/bin/speak"
-  "Program used by rbook for tts sakes.
-These program should accept text on stdin and produce speech output.")
 
 (defun rbook-speak-region (start end)
   (let ((buf (get-buffer-create " *book*"))
@@ -66,7 +74,10 @@ These program should accept text on stdin and produce speech output.")
       ;; Now speak it
       (call-process-region (point-min) (point-max)
 			   rbook-tts-program
-			   nil nil nil))))
+			   nil nil nil
+			   "-v" (number-to-string rbook-speech-volume)
+			   "-r" (number-to-string rbook-speech-rate)
+			   "-f" (number-to-string rbook-speech-sampling)))))
 
 
 (defvar rbook-sentence-end "[.?!][]\"')}]*\\([ \t]+\\|[ \t]*\n\\)"

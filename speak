@@ -6,24 +6,41 @@
 #
 # The flag "-s" followed by a number means silence
 # for the requested number of hundredth of second.
+# -v <value> defines speech volume. Value must be between 0 and 1.
+# -r <value> defines speech rate. Value must be between 0 and 1.
+# -f <value> defines treatment of sampling frequency in Hz.
 
-# Speech parameters:
+# Default values of speech parameters:
 VOLUME=0.8
 FREQUENCY=10300
 RATE=0.0
 
 # Commands to use for actual tasks accomplishing:
-sndgen="ru_tts -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words"
-sndplay="sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp"
+sndgen='ru_tts -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words'
+sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp'
 
 # Command line parsing:
-case $1 in
-  -s) shift
-      sndgen="dd if=/dev/zero bs=`expr $FREQUENCY / 100` count=$1"
-      ;;
-  *) ;;
-esac
+while test $1
+do case $1 in
+     -s) shift
+         length=$1
+         sndgen='dd if=/dev/zero bs=`expr $FREQUENCY / 100` count=$length'
+         ;;
+     -v) shift
+         VOLUME=$1
+         ;;
+     -r) shift
+         RATE=$1
+         ;;
+     -f) shift
+         FREQUENCY=$1
+         ;;
+      *) shift
+         ;;
+   esac
+   shift
+done
 
 # Do the job.
 exec 2>/dev/null
-exec $sndgen | $sndplay
+eval "exec $sndgen | $sndplay"
