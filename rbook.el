@@ -414,9 +414,10 @@ this process will generate silence for given number of empty lines."
 	   (goto-char rbook-current-position)
 	   (if (looking-at rbook-blank-space)
 	       (let ((blank (1- (count-lines
-				 (match-beginning 0)
-				 (match-end 0)))))
-		 (goto-char (match-end 0))
+				 (progn (goto-char (match-beginning 0))
+					(line-end-position))
+				 (progn (goto-char (match-end 0))
+					(line-beginning-position))))))
 		 (when rbook-current-output-chunk
 		   (if (looking-at rbook-chapter-regexp)
 		       (progn
@@ -540,10 +541,13 @@ In this case split denotes the number of the first chunk."
       (rbook-speak-region start end)
       (setq start end)
       (goto-char start)
-      (when (looking-at "[ \t\f]*\n\\([ \t\f]*\n\\)+")
-	(goto-char (setq start (match-end 0)))
-	(rbook-delay (1- (count-lines (match-beginning 0)
-				      (match-end 0))))))))
+      (when (looking-at rbook-blank-space)
+	(rbook-delay (1- (count-lines
+			  (progn (goto-char (match-beginning 0))
+				 (line-end-position))
+			  (progn (goto-char (match-end 0))
+				 (line-beginning-position)))))
+	(setq start (point))))))
 
 
 (defun rbook-read-bookmark (bmk)
