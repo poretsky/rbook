@@ -1,0 +1,6 @@
+#!/bin/sh
+VOLUME=0.8
+FREQUENCY=10300
+RATE=0.0
+exec ru_tts -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words \
+| sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp
