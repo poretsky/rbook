@@ -571,11 +571,10 @@ specified by the variable `rbook-tts-program'. Before reading jump to
 the bookmark BMK. When called interactively and prefix argument is
 given, ask for BMK. Otherwise use `rbook-default-bookmark' as value."
   (interactive
-   (list
-    (if current-prefix-arg
-	(bookmark-completing-read "Read from bookmark"
-				  rbook-default-bookmark)
-      rbook-default-bookmark)))
+   (if current-prefix-arg
+       (bookmark-completing-read "Read from bookmark"
+				 rbook-default-bookmark)
+     (list rbook-default-bookmark)))
   (setq rbook-default-bookmark bmk)
   (unless (string= bookmark-current-bookmark bmk)
     (bookmark-jump bmk))
