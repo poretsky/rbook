@@ -3,6 +3,7 @@
 ;; Copyright (C) 2002  Dmitry V. Paduchikh
 
 ;; Author: Dmitry Paduchikh <paduch@imm.uran.ru>
+;; Modified by Igor B. Poretsky <root@goga.energo.ru>
 ;; Keywords: multimedia
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -34,13 +35,15 @@
 (defvar rbook-delay-lines 3
   "*Maximum number of empty lines producing pause.")
 
-(defvar rbook-delay-factor 1200
-  "*Number of delay cycles for one empty line.")
+(defvar rbook-delay-factor 20
+  "*One empty line silence length in hundredth of second.")
 
 
 (defun rbook-delay (n)
-  (dotimes (i (min n rbook-delay-lines))
-    (dotimes (j rbook-delay-factor))))
+  "Makes silence for empty lines."
+  (call-process rbook-tts-program nil nil nil "-s"
+		(number-to-string
+		 (* rbook-delay-factor (min n rbook-delay-lines)))))
 
 
 (defvar rbook-tts-program "/usr/local/bin/speak"

@@ -1,6 +1,29 @@
 #!/bin/sh
+
+# This script is a part of Rbook package.
+# It's purpose is to generate and play audible speech
+# from the text which comes to standard input.
+#
+# The flag "-s" followed by a number means silence
+# for the requested number of hundredth of second.
+
+# Speech parameters:
 VOLUME=0.8
 FREQUENCY=10300
 RATE=0.0
-exec ru_tts -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words \
-| sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp
+
+# Commands to use for actual tasks accomplishing:
+sndgen="ru_tts -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words"
+sndplay="sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp"
+
+# Command line parsing:
+case $1 in
+  -s) shift
+      sndgen="dd if=/dev/zero bs=`expr $FREQUENCY / 100` count=$1"
+      ;;
+  *) ;;
+esac
+
+# Do the job.
+exec 2>/dev/null
+exec $sndgen | $sndplay
