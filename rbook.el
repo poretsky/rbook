@@ -106,9 +106,9 @@ and produce an appropriate file.")
 		 (* rbook-delay-factor (min n rbook-delay-lines)))))
 
 (defun rbook-speak-region (start end)
-  (let ((buf (get-buffer-create " *book*"))
-	(oldbuf (current-buffer)))
-    (with-current-buffer buf
+  "Transfer text to the TTS engine."
+  (let ((oldbuf (current-buffer)))
+    (with-temp-buffer
       (erase-buffer)
       (insert-buffer-substring oldbuf start end)
       ;; Cleaning the text
