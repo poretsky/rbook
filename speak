@@ -20,7 +20,7 @@ RATE=0.0
 PITCH=0.0
 
 # Commands to use for actual tasks accomplishing:
-sndgen='ru_tts -p $PITCH -r $RATE -s /usr/local/lib/ru_tts/lexicon -l /var/log/unknown.words'
+sndgen='ru_tts -p $PITCH -r $RATE -s /usr/local/lib/ru_tts/lexicon'
 sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp'
 
 # Command line parsing:
