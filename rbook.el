@@ -306,6 +306,9 @@ where current output chunk has started.")
 (defvar rbook-switch-chunk nil
   "Indicator of necessity of chunk switching.")
 
+(defvar rbook-split-enabled nil
+  "This flag indicates when splitting by chapter may be done.")
+
 (defun rbook-read-sentence ()
   "Read current sentence and process it."
   (let ((sentence-end rbook-sentence-end)
@@ -405,7 +408,11 @@ this process will generate silence for given number of empty lines."
 		 (goto-char (match-end 0))
 		 (when rbook-current-output-chunk
 		   (if (looking-at rbook-chapter-regexp)
-		       (setq rbook-switch-chunk t)
+		       (progn
+			 (when rbook-split-enabled
+			   (setq rbook-switch-chunk t))
+			 (setq rbook-split-enabled nil))
+		     (setq rbook-split-enabled t)
 		     (when (and rbook-split-by-time
 				(rbook-test-current-chunk-length))
 		       (setq rbook-switch-chunk t))))
@@ -491,6 +498,7 @@ In this case split denotes the number of the first chunk."
     (unless (file-exists-p (directory-file-name rbook-output-path))
       (make-directory rbook-output-path t)))
   (setq rbook-current-output-chunk split)
+  (setq rbook-split-enabled nil)
   (setq rbook-processing-buffer (current-buffer))
   (setq rbook-exchange-buffer (get-buffer-create " *rbook-exchange*"))
   (setq rbook-current-position (point))
