@@ -12,6 +12,7 @@
 # -f <value> defines treatment of sampling frequency in Hz.
 # -n -- Don't play generated sound stream.
 # Return it as a standard output instead.
+# -l -- Collect unknown words in /var/log/unknown.words.
 
 # Default values of speech parameters:
 VOLUME=0.8
@@ -22,6 +23,7 @@ PITCH=0.0
 # Commands to use for actual tasks accomplishing:
 sndgen='ru_tts -p $PITCH -r $RATE -s /usr/local/lib/ru_tts/lexicon'
 sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp'
+collect=""
 
 # Command line parsing:
 while test $1
@@ -44,6 +46,8 @@ do case $1 in
          ;;
      -n) sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t raw -u -'
          ;;
+     -l) collect="-l /var/log/unknown.words"
+         ;;
       *) ;;
    esac
    shift
@@ -51,4 +55,4 @@ done
 
 # Do the job.
 exec 2>/dev/null
-eval "exec $sndgen | $sndplay"
+eval "exec $sndgen $collect | $sndplay"

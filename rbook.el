@@ -117,6 +117,11 @@ such as quotes, parentheses and so on."
   :group 'rbook
   :type 'string)
 
+(defcustom rbook-collect-unknown-words nil
+  "*Whether to allow speech synthesizer to collect unknown words."
+  :group 'rbook
+  :type 'boolean)
+
 (defun rbook-customize ()
   "Customize Rbook parameters."
   (interactive)
@@ -145,10 +150,14 @@ These program should accept sound stream on stdin and produce an mp3-file.")
 
 (defun rbook-tts-args ()
   "This function returns list of arguments for the TTS program."
-  (list "-v" (number-to-string rbook-speech-volume)
-	"-p" (number-to-string rbook-speech-pitch)
-	"-r" (number-to-string rbook-speech-rate)
-	"-f" (number-to-string rbook-speech-sampling)))
+  (let ((args (list
+	       "-v" (number-to-string rbook-speech-volume)
+	       "-p" (number-to-string rbook-speech-pitch)
+	       "-r" (number-to-string rbook-speech-rate)
+	       "-f" (number-to-string rbook-speech-sampling))))
+    (if rbook-collect-unknown-words
+	(cons "-l" args)
+      args)))
 
 (defun rbook-speak ()
   "Speak current buffer."
