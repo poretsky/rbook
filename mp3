@@ -6,12 +6,14 @@
 #
 # -f <value> -- Sampling frequency of the original sound stream in kHz.
 # -b <value> -- Wanted bitrate.
+# -v <value> -- Volume scale factor.
 
 # Output file name must be determined in the command line.
 
 # Default parameters:
 FREQUENCY=10.3
 BITRATE=32
+VOLUME=1.0
 
 # Command line parsing:
 while test $1
@@ -22,6 +24,9 @@ do case $1 in
      -b) shift
          BITRATE=$1
          ;;
+     -v) shift
+         VOLUME=$1
+         ;;
       *) file=$1
          ;;
    esac
@@ -31,7 +36,7 @@ done
 exec 2>&1 >/dev/null
 
 # Use VBR
-# eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m --vbr-new -V 0 --abr $BITRATE - $file
+# eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m --scale $VOLUME --vbr-new -V 0 --abr $BITRATE - $file
 
 # For hardware players
-eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m -b $BITRATE -F -q 0 - $file
+eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m --scale $VOLUME -b $BITRATE -F -q 0 - $file

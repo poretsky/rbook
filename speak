@@ -44,7 +44,7 @@ do case $1 in
      -f) shift
          FREQUENCY=$1
          ;;
-     -n) sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t raw -u -'
+     -n) sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 - -t raw -u -'
          ;;
      -l) collect="-l /var/log/unknown.words"
          ;;

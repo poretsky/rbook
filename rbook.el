@@ -47,7 +47,7 @@
 
 (defcustom rbook-speech-volume 0.8
   "*Generated speech volume. Reasonable values range from 0.0 to 1.0.
-For audio book producing 1.0 is recommended."
+For audio book producing this parameter has no effect."
   :group 'rbook-speech
   :type 'number)
 
@@ -95,6 +95,11 @@ how frequently the progress message should be displayed."
   "*Encoding bitrate in kbps."
   :group 'rbook-audiobook
   :type 'integer)
+
+(defcustom rbook-mp3-volume 1.0
+  "*Volume scale factor for produced mp3-files."
+  :group 'rbook-audiobook
+  :type 'number)
 
 (defcustom rbook-eliminate-punctuations t
   "*Whether to iliminate speaking of some punctuations,
@@ -376,6 +381,7 @@ this process will generate silence for given number of empty lines."
 			 "-b" (number-to-string rbook-encoding-bitrate)
 			 "-f" (number-to-string
 			       (/ rbook-speech-sampling 1000.0))
+			 "-v" (number-to-string rbook-mp3-volume)
 			 file)))
   (set-process-coding-system rbook-encoding-process 'raw-text 'raw-text)
   (set-process-sentinel
