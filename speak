@@ -10,6 +10,8 @@
 # -p <value> -- Set pitch. Value must be between 0 and 1.
 # -r <value> -- Set speech rate. Value must be between 0 and 1.
 # -f <value> defines treatment of sampling frequency in Hz.
+# -n -- Don't play generated sound stream.
+# Return it as a standard output instead.
 
 # Default values of speech parameters:
 VOLUME=0.8
@@ -40,8 +42,9 @@ do case $1 in
      -f) shift
          FREQUENCY=$1
          ;;
-      *) exit 1
+     -n) sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t raw -u -'
          ;;
+      *) ;;
    esac
    shift
 done

@@ -44,16 +44,60 @@
 (defvar rbook-speech-sampling 10300
   "*How to treat generated speech sampling rate.")
 
+(defvar rbook-encoding-bitrate 32
+  "*Encoding bitrate in kbps.")
+
 (defvar rbook-delay-lines 3
   "*Maximum number of empty lines producing pause.")
 
 (defvar rbook-delay-factor 20
   "*One empty line silence length in hundredth of second.")
 
-(defvar rbook-tts-program "/usr/local/bin/speak"
+(defvar rbook-tts-program "/usr/local/lib/rbook/speak"
   "Program used by rbook for tts sakes.
 These program should accept text on stdin and produce speech output.")
 
+(defvar rbook-encoding-program "/usr/local/lib/rbook/mp3"
+  "Program used by rbook for sound encoding.
+These program should accept sound stream on stdin
+and produce an appropriate file.")
+
+(defvar rbook-sound-play-program "/usr/local/lib/rbook/play"
+  "*Program used to play sounds.")
+
+(defvar rbook-encoding-done-sound "/usr/local/lib/rbook/task-done.au"
+  "*Sound file to play when encoding process finishes.")
+
+(defvar rbook-encoding-progress-sound "/usr/local/lib/rbook/progress.au"
+  "*Sound file to play whith progress messages.")
+
+(defvar rbook-output-chunk-limit 300
+  "*Time limit of output chunks.")
+
+(defvar rbook-split-by-time nil
+  "*Whether to split output by playing time.")
+
+(defvar rbook-chapter-regexp "[ \f\t]*\\(ημαχα[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
+  "*Regexp to match chapter header.")
+
+(defvar rbook-output-files-extension ".mp3"
+  "*File extension to use for output files.")
+
+(defun rbook-tts-args ()
+  "This function returns list of arguments for the TTS program."
+  (list "-v" (number-to-string rbook-speech-volume)
+	"-p" (number-to-string rbook-speech-pitch)
+	"-r" (number-to-string rbook-speech-rate)
+	"-f" (number-to-string rbook-speech-sampling)))
+
+(defun rbook-speak ()
+  "Speak current buffer."
+  (apply 'call-process-region (point-min) (point-max)
+	 rbook-tts-program
+	 nil nil nil (rbook-tts-args)))
+
+(defvar rbook-tts-function 'rbook-speak
+  "Function to use for TTS.")
 
 (defun rbook-delay (n)
   "Makes silence for empty lines."
@@ -72,23 +116,260 @@ These program should accept text on stdin and produce speech output.")
       (while (re-search-forward "\\(\\w\\)-[ \t]*\n[ \t]*\\(\\w\\)" nil t)
 	(replace-match "\\1\\2" nil nil))
       (subst-char-in-region (point-min) (point-max) ?\n ?  t)
+      (goto-char (point-min))
+      (while (re-search-forward "[ \f\t]+" nil t)
+	(replace-match " " nil nil))
+      (goto-char (point-min))
+      (when (re-search-forward "^ " nil t)
+	(replace-match "" nil nil))
+      (when (re-search-forward " $" nil t)
+	(replace-match "" nil nil))
       (goto-char (point-max))
       (insert "\n")
       ;; Now speak it
-      (call-process-region (point-min) (point-max)
-			   rbook-tts-program
-			   nil nil nil
-			   "-v" (number-to-string rbook-speech-volume)
-			   "-p" (number-to-string rbook-speech-pitch)
-			   "-r" (number-to-string rbook-speech-rate)
-			   "-f" (number-to-string rbook-speech-sampling)))))
+      (funcall rbook-tts-function))))
 
 
-(defvar rbook-sentence-end "[.?!][]\"')}]*\\([ \t]+\\|[ \t]*\n\\)"
+(defvar rbook-sentence-end "[.?!]+[]\"')}]*\\([ \t]+\\|[ \t]*\n\\)"
   "*Regular expression to match end of a sentence.")
+
+(defvar rbook-blank-space "[ \t\f!-/:-?]*\n\\([ \t\f!-/:-?]*\n\\)+\\([ \t\f.!?]*[ \t\f]\\)?"
+  "Regular expression for blank space detecting.")
+
+(defvar rbook-continue-encoding nil
+  "Whether to continue encoding process.")
+
+(defvar rbook-processed-amount 0.0
+  "Amount of sound stream already processed.")
+
+(defvar rbook-processing-buffer nil
+  "Buffer holding processing text.")
+
+(defvar rbook-current-position 0
+  "Current position in the processing text.")
+
+(defvar rbook-output-path nil
+  "Path to the file or directory where output should go.")
+
+(defvar rbook-current-output-chunk nil
+  "Number of current output chunk or nil.")
+
+(defvar rbook-current-chunk-start-position 0.0
+  "Position in the produced sound stream
+where current output chunk has started.")
+
+(defvar rbook-tts-process nil
+  "TTS process handle.")
+
+(defvar rbook-encoding-process nil
+  "Sound encoding process handle.")
+
+(defvar rbook-exchange-buffer nil
+  "Buffer for processes communication.")
+
+(defvar rbook-encoding-process-ready nil
+  "Indicator of readiness of encoding process to accept input.")
+
+(defvar rbook-switch-chunk nil
+  "Indicator of necessity of chunk switching.")
+
+(defun rbook-read-sentence ()
+  "Read current sentence and process it."
+  (let ((sentence-end rbook-sentence-end)
+	(start (point)) end)
+    (setq end
+	  (save-excursion (forward-sentence 1)
+			  (point)))
+    (if (< start end)
+	(if (save-excursion (goto-char start)
+			    (re-search-forward "\\w\\|[0-9]" end t))
+	    (rbook-speak-region start end)
+	  (funcall rbook-tts-function 1))
+      (funcall rbook-tts-function rbook-delay-lines)
+      (setq rbook-continue-encoding nil))
+    (goto-char end)))
+
+(defun rbook-output-file ()
+  "Returns current output file name."
+  (if rbook-current-output-chunk
+      (format "%s%03d%s"
+	      rbook-output-path
+	      rbook-current-output-chunk
+	      rbook-output-files-extension)
+    rbook-output-path))
+
+(defun rbook-test-current-chunk-length ()
+  "Returns t if current output chunk exceeds time limit, nil otherwise."
+  (>= (/ (- rbook-processed-amount rbook-current-chunk-start-position)
+	 rbook-speech-sampling)
+      rbook-output-chunk-limit))
+
+(defun rbook-evaluate-time ()
+  "Calculate playing time of processed sound."
+  (let* ((time (round (/ rbook-processed-amount rbook-speech-sampling)))
+	 (hours (/ time 3600))
+	 (minutes (/ (% time 3600) 60))
+	 (seconds (% time 60)))
+    (format "%02d:%02d:%02d" hours minutes seconds)))
+
+(defun rbook-evaluate-size ()
+  "Calculate size of produced sound files in kb."
+  (round (/ (* rbook-processed-amount rbook-encoding-bitrate)
+	    (* rbook-speech-sampling 8))))
+
+(defun rbook-show-time ()
+  "Show playing time of already processed text."
+  (interactive)
+  (message "Processed %s of playing time.\n" (rbook-evaluate-time)))
+
+(defun rbook-run-tts-process (&optional silence)
+  "Run TTS process for current buffer.
+If optional argument silence is supplied,
+this process will generate silence for given number of empty lines."
+  (setq rbook-tts-process
+	(let ((process-connection-type nil))
+	  (apply 'start-process "rbook-tts" rbook-exchange-buffer
+		 rbook-tts-program "-n"
+		 (if silence
+		     (list "-s"
+			   (number-to-string
+			    (* rbook-delay-factor
+			       (min silence rbook-delay-lines))))
+		   (rbook-tts-args)))))
+  (set-process-coding-system rbook-tts-process 'raw-text 'cyrillic-koi8)
+  (set-process-sentinel
+   rbook-tts-process
+   (lambda (proc str)
+     (when rbook-encoding-process-ready
+       (with-current-buffer rbook-exchange-buffer
+	 (when (< (point-min) (point-max))
+	   (let ((start (point-min))
+		 (end (point-max)))
+	     (process-send-region rbook-encoding-process start end)
+	     (setq rbook-processed-amount
+		   (+ rbook-processed-amount (float (- end start))))
+	     (delete-region start end))))
+       (when rbook-switch-chunk
+	 (setq rbook-switch-chunk nil)
+	 (setq rbook-encoding-process-ready nil)
+	 (process-send-eof rbook-encoding-process))
+       (unless rbook-current-output-chunk
+	 (when (rbook-test-current-chunk-length)
+	   (call-process rbook-sound-play-program
+			 nil 0 nil
+			 rbook-encoding-progress-sound)
+	   (setq rbook-current-chunk-start-position rbook-processed-amount)
+	   (rbook-show-time))))
+     (unless (buffer-live-p rbook-processing-buffer)
+       (setq rbook-continue-encoding nil))
+     (if rbook-continue-encoding
+	 (with-current-buffer rbook-processing-buffer
+	   (goto-char rbook-current-position)
+	   (if (looking-at rbook-blank-space)
+	       (let ((blank (1- (count-lines
+				 (match-beginning 0)
+				 (match-end 0)))))
+		 (goto-char (match-end 0))
+		 (when rbook-current-output-chunk
+		   (if (looking-at rbook-chapter-regexp)
+		       (setq rbook-switch-chunk t)
+		     (when (and rbook-split-by-time
+				(rbook-test-current-chunk-length))
+		       (setq rbook-switch-chunk t))))
+		 (rbook-run-tts-process
+		  (if rbook-switch-chunk
+		      rbook-delay-lines
+		    blank)))
+	     (rbook-read-sentence))
+	   (setq rbook-current-position (point)))
+       (process-send-eof rbook-encoding-process))))
+  (unless silence
+    (process-send-region rbook-tts-process (point-min) (point-max))
+    (process-send-eof rbook-tts-process)))
+
+(defun rbook-run-encoding-process (file)
+  "Run encoding process."
+  (setq rbook-encoding-process
+	(let ((process-connection-type nil))
+	  (start-process "rbook-encoding" nil
+			 rbook-encoding-program
+			 "-b" (number-to-string rbook-encoding-bitrate)
+			 "-f" (number-to-string
+			       (/ rbook-speech-sampling 1000.0))
+			 file)))
+  (set-process-coding-system rbook-encoding-process 'raw-text 'raw-text)
+  (set-process-sentinel
+   rbook-encoding-process
+   (lambda (proc str)
+     (if (and rbook-continue-encoding rbook-current-output-chunk)
+	 (progn (setq rbook-current-output-chunk
+		      (1+ rbook-current-output-chunk))
+		(rbook-run-encoding-process (rbook-output-file))
+		(call-process rbook-sound-play-program
+			      nil 0 nil
+			      rbook-encoding-progress-sound)
+		(rbook-show-time))
+       (call-process rbook-sound-play-program
+		     nil 0 nil
+		     rbook-encoding-done-sound)
+       (kill-buffer rbook-exchange-buffer)
+       (setq rbook-encoding-process nil)
+       (message
+	"Book encoding has %sTotal playing time = %s (%d kb).\n"
+	str (rbook-evaluate-time) (rbook-evaluate-size)))))
+  (setq rbook-current-chunk-start-position rbook-processed-amount)
+  (setq rbook-encoding-process-ready t))
+
+(defun rbook-construct-output-path (need-split)
+  "Construct path to the output file or directory
+depending on necessity to split output."
+  (let ((path (file-name-sans-extension
+	       (file-name-sans-extension (buffer-file-name)))))
+    (if need-split
+	(file-name-as-directory path)
+      (concat (directory-file-name path) rbook-output-files-extension))))
+
+(defun rbook-make-sound-files (&optional split path)
+  "Make sound files from the text in the current buffer from current position.
+If split argument is not `nil' then output will be split by separate chunks.
+In this case split denotes the number of the first chunk."
+  (interactive
+   (let* ((default-chunk-number
+	    (number-to-string (or rbook-current-output-chunk 0)))
+	  (need-split
+	   (and (y-or-n-p "Do you need to split output? ")
+		(string-to-number (read-string
+				   "First chunk number: "
+				   default-chunk-number
+				   nil
+				   default-chunk-number)))))
+     (list need-split
+	   (read-file-name "Where output should go? "
+			   nil (rbook-construct-output-path need-split)))))
+  (when rbook-encoding-process
+    (error "Can run only one such process at a time. Sorry"))
+  (setq rbook-output-path
+	(or path
+	    (rbook-construct-output-path split)))
+  (if (not split)
+      (setq rbook-output-path (directory-file-name rbook-output-path))
+    (setq rbook-output-path (file-name-as-directory rbook-output-path))
+    (unless (file-exists-p (directory-file-name rbook-output-path))
+      (make-directory rbook-output-path t)))
+  (setq rbook-current-output-chunk split)
+  (setq rbook-processing-buffer (current-buffer))
+  (setq rbook-exchange-buffer (get-buffer-create " *rbook-exchange*"))
+  (setq rbook-current-position (point))
+  (setq rbook-processed-amount 0.0)
+  (setq rbook-continue-encoding t)
+  (setq rbook-tts-function 'rbook-run-tts-process)
+  (rbook-run-encoding-process (rbook-output-file))
+  (rbook-read-sentence)
+  (setq rbook-current-position (point)))
 
 (defun rbook-read-text ()
   (interactive)
+  (setq rbook-tts-function 'rbook-speak)
   (dtk-stop)
   (sleep-for 1)
   (push-mark nil t)

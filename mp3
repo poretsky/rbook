@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# This script is a part of Rbook package.
+# It's purpose is to encode sound stream coming to the standard input
+# to mp3.
+#
+# -f <value> -- Sampling frequency of the original sound stream in kHz.
+# -b <value> -- Wanted bitrate.
+
+# Output file name must be determined in the command line.
+
+# Default parameters:
+FREQUENCY=10.3
+BITRATE=32
+
+# Command line parsing:
+while test $1
+do case $1 in
+     -f) shift
+         FREQUENCY=$1
+         ;;
+     -b) shift
+         BITRATE=$1
+         ;;
+      *) file=$1
+         ;;
+   esac
+   shift
+done
+
+exec 2>&1 >/dev/null
+
+# Use VBR
+# eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m --vbr-new -V 0 --abr $BITRATE - $file
+
+# For hardware players
+eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m -b $BITRATE -F -q 0 - $file
