@@ -97,7 +97,7 @@ how frequently the progress message should be displayed."
 (defcustom rbook-chapter-regexp "[ \f\t]*\\(ημαχα[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
   "*Regexp to match chapter header."
   :group 'rbook-audiobook
-  :type 'integer)
+  :type 'regexp)
 
 (defcustom rbook-mp3-bitrate 32
   "*Encoding bitrate in kbps."
