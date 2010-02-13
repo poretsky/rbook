@@ -94,7 +94,7 @@ how frequently the progress message should be displayed."
   :group 'rbook-audiobook
   :type 'integer)
 
-(defcustom rbook-chapter-regexp "[ \f\t]*\\(ημαχα[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
+(defcustom rbook-chapter-regexp "[ \f\t]*\\(Π“Π›ΠΠ’Π[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
   "*Regexp to match chapter header."
   :group 'rbook-audiobook
   :type 'regexp)
@@ -148,6 +148,12 @@ such as quotes, parentheses and so on."
   "Program used by rbook for tts sakes.
 These program should accept text on stdin and produce speech output.")
 
+(defvar rbook-tts-coding-system 'cyrillic-koi8
+  "Coding system accepted by the TTS program.")
+
+(defvar rbook-tts-downcase-required t
+  "Downcase text before sending it to the TTS program.")
+
 (defvar rbook-mp3-program "/usr/local/lib/rbook/mp3"
   "Program used by rbook for producing audio book in MP3 format.
 These program should accept sound stream on stdin and produce an mp3-file.")
@@ -174,9 +180,12 @@ These program should accept sound stream on stdin and produce an mp3-file.")
 
 (defun rbook-speak ()
   "Speak current buffer."
-  (apply 'call-process-region (point-min) (point-max)
-	 rbook-tts-program
-	 nil nil nil (rbook-tts-args)))
+  (when rbook-tts-downcase-required
+    (downcase-region (point-min) (point-max)))
+  (let ((coding-system-for-write rbook-tts-coding-system))
+    (apply 'call-process-region (point-min) (point-max)
+           rbook-tts-program
+           nil nil nil (rbook-tts-args))))
 
 (defvar rbook-tts-function 'rbook-speak
   "Function to use for TTS.")
@@ -249,19 +258,19 @@ These program should accept sound stream on stdin and produce an mp3-file.")
       (while (re-search-forward "\\(\\w\\)-[ \t]*\n[ \t]*\\(\\w\\)" nil t)
 	(replace-match "\\1\\2" nil nil))
       (goto-char (point-min))
-      (while (re-search-forward "\\(\\w\\)[ \t]*\\(Φ\\W\\)" nil t)
+      (while (re-search-forward "\\(\\w\\)[ \t]*\\(Π¶\\W\\)" nil t)
 	(replace-match "\\1\\2" nil nil))
       (goto-char (point-min))
-      (while (re-search-forward "\\(\\(^\\|\\W\\)[βχ]\\)\\(\\.\\)" nil t)
-	(replace-match "\\1ά\\3" nil nil)
+      (while (re-search-forward "\\(\\(^\\|\\W\\)[Π‘Π’]\\)\\(\\.\\)" nil t)
+	(replace-match "\\1Ρ\\3" nil nil)
 	(backward-char))
       (goto-char (point-min))
-      (while (re-search-forward "\\(\\(^\\|\\W\\)λ\\)\\(\\.\\)" nil t)
-	(replace-match "\\1Α\\3" nil nil)
+      (while (re-search-forward "\\(\\(^\\|\\W\\)Π\\)\\(\\.\\)" nil t)
+	(replace-match "\\1Π°\\3" nil nil)
 	(backward-char))
       (goto-char (point-min))
-      (while (re-search-forward "\\(^\\|\\W\\)\\(σ\\.\\)" nil t)
-	(replace-match "\\1ά\\2" nil nil)
+      (while (re-search-forward "\\(^\\|\\W\\)\\(Π΅\\.\\)" nil t)
+	(replace-match "\\1Ρ\\2" nil nil)
 	(backward-char))
       (when rbook-eliminate-punctuations
 	(subst-char-in-region (point-min) (point-max) ?* ?  t)
@@ -398,7 +407,7 @@ this process will generate silence for given number of empty lines."
 			    (* rbook-delay-factor
 			       (min silence rbook-delay-lines))))
 		   (rbook-tts-args)))))
-  (set-process-coding-system rbook-tts-process 'raw-text 'cyrillic-koi8)
+  (set-process-coding-system rbook-tts-process 'raw-text rbook-tts-coding-system)
   (set-process-sentinel
    rbook-tts-process
    (lambda (proc str)
@@ -407,6 +416,8 @@ this process will generate silence for given number of empty lines."
 	 (when (< (point-min) (point-max))
 	   (let ((start (point-min))
 		 (end (point-max)))
+             (when rbook-tts-downcase-required
+               (downcase-region start end))
 	     (process-send-region rbook-encoding-process start end)
 	     (setq rbook-processed-amount
 		   (+ rbook-processed-amount (float (- end start))))
@@ -455,6 +466,8 @@ this process will generate silence for given number of empty lines."
 	   (setq rbook-current-position (point)))
        (process-send-eof rbook-encoding-process))))
   (unless silence
+    (when rbook-tts-downcase-required
+      (downcase-region (point-min) (point-max)))
     (process-send-region rbook-tts-process (point-min) (point-max))
     (process-send-eof rbook-tts-process)))
 
