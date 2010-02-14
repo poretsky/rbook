@@ -3,7 +3,7 @@
 ;; Copyright (C) 2002  Dmitry V. Paduchikh
 
 ;; Author: Dmitry Paduchikh <paduch@imm.uran.ru>
-;; Modified by Igor B. Poretsky <root@goga.energo.ru>
+;; Modified by Igor B. Poretsky <poretsky@mlbox.ru>
 ;; Keywords: multimedia
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 
 ;;; Code:
 
-;;; Command to read buffer sentence by sentence
+;; Requirements:
 
 (eval-when-compile (require 'cl))
 (require 'bookmark)
@@ -46,19 +46,19 @@
   :group 'rbook)
 
 (defcustom rbook-speech-volume 0.8
-  "*Generated speech volume. Reasonable values range from 0.0 to 1.0.
+  "Generated speech volume. Reasonable values range from 0.0 to 1.0.
 For audio book producing this parameter has no effect."
   :group 'rbook-speech
   :type 'number)
 
 (defcustom rbook-speech-pitch 0.0
-  "*Generated speech pitch. Reasonable values range from 0.0 to 1.0.
+  "Generated speech pitch. Reasonable values range from 0.0 to 1.0.
 The greater value causes higher pitch."
   :group 'rbook-speech
   :type 'number)
 
-(defcustom rbook-speech-rate 0.0
-  "*Generated speech rate. Reasonable values range from 0.0 to 1.0.
+(defcustom rbook-speech-rate 0.5
+  "Generated speech rate. Reasonable values range from 0.0 to 1.0.
 The greater value causes slower speech."
   :group 'rbook-speech
   :type 'number)
@@ -69,71 +69,82 @@ actual sampling rate, but varying this value we can change playing speed."
   :group 'rbook-speech
   :type 'integer)
 
+(defvar rbook-default-pronunciation-dictionary "/usr/local/share/ru_tts/lexicon"
+  "File name of pronunciation dictionary used by `rbook-tts-program'
+if it is not customized by user.")
+
+(defcustom rbook-pronunciation-dictionary rbook-default-pronunciation-dictionary
+  "File name of pronunciation dictionary used by `rbook-tts-program'."
+  :group 'rbook-speech
+  :type '(radio (const :tag "No dictionary" nil)
+                (file :must-match t)))
+
 (defgroup rbook-audiobook nil
   "Producing audio books"
   :prefix "rbook-"
   :group 'rbook)
 
 (defcustom rbook-split-by-blank-lines 0
-  "*If this value is greater than 0, it defines number of blank lines
+  "If this value is greater than 0, it defines number of blank lines
 which causes splitting output. 0 denotes no splitting by blank lines.
-Lines filled by non-pronunciable symbols (such as punctuations)
+Lines filled by non-pronounceable symbols (such as punctuations)
 are also treated as blank."
   :group 'rbook-audiobook
   :type 'integer)
 
 (defcustom rbook-split-by-time nil
-  "*Whether to split output by playing time."
+  "Whether to split output by playing time."
   :group 'rbook-audiobook
   :type 'boolean)
 
 (defcustom rbook-output-chunk-limit 300
-  "*Time limit of output chunks in seconds.
+  "Time limit of output chunks in seconds.
 When splitting output is not requested, this value defines
 how frequently the progress message should be displayed."
   :group 'rbook-audiobook
   :type 'integer)
 
 (defcustom rbook-chapter-regexp "[ \f\t]*\\(ГЛАВА[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
-  "*Regexp to match chapter header."
+  "Regexp to match chapter header."
   :group 'rbook-audiobook
   :type 'regexp)
 
 (defcustom rbook-mp3-bitrate 32
-  "*Encoding bitrate in kbps."
+  "Encoding bitrate in kbps."
   :group 'rbook-audiobook
   :type 'integer)
 
 (defcustom rbook-mp3-volume 1.0
-  "*Volume scale factor for produced mp3-files."
+  "Volume scale factor for produced mp3-files."
   :group 'rbook-audiobook
   :type 'number)
 
 (defcustom rbook-eliminate-punctuations t
-  "*Whether to iliminate speaking of some punctuations,
+  "Whether to iliminate speaking of some punctuations,
 such as quotes, parentheses and so on."
   :group 'rbook
   :type 'boolean)
 
 (defcustom rbook-delay-lines 3
-  "*Maximum number of empty lines producing pause."
+  "Maximum number of empty lines producing pause."
   :group 'rbook
   :type 'integer)
 
 (defcustom rbook-delay-factor 20
-  "*One empty line silence length in hundredth of second."
+  "One empty line silence length in hundredth of second."
   :group 'rbook
   :type 'integer)
 
 (defcustom rbook-default-bookmark "book"
-  "*Default bookmark to start reading from."
+  "Default bookmark to start reading from."
   :group 'rbook
   :type 'string)
 
 (defcustom rbook-collect-unknown-words nil
-  "*Whether to allow speech synthesizer to collect unknown words."
+  "Whether to allow speech synthesizer to collect unknown words."
   :group 'rbook
-  :type 'boolean)
+  :type '(choice (const :tag "Off" nil)
+                 file))
 
 (defun rbook-customize ()
   "Customize Rbook parameters."
@@ -141,12 +152,36 @@ such as quotes, parentheses and so on."
   (customize-group 'rbook))
 
 
+;; File names and paths
+
+(defvar rbook-scripts-directory (file-name-directory load-file-name)
+  "Directory where helper scripts are placed.")
+
+(defvar rbook-sounds-directory (file-name-directory load-file-name)
+"Directory where sound icons are stored.")
+
 (defvar rbook-output-files-extension ".mp3"
   "Extension to use for output files.")
 
-(defvar rbook-tts-program "/usr/local/lib/rbook/speak"
+(defvar rbook-tts-program (expand-file-name "speak" rbook-scripts-directory)
   "Program used by rbook for tts sakes.
 These program should accept text on stdin and produce speech output.")
+
+(defvar rbook-mp3-program (expand-file-name "mp3" rbook-scripts-directory)
+  "Program used by rbook for producing audio book in MP3 format.
+These program should accept sound stream on stdin and produce an mp3-file.")
+
+(defvar rbook-sound-play-program (expand-file-name "play" rbook-scripts-directory)
+  "Program used to play audio icons.")
+
+(defvar rbook-encoding-done-sound (expand-file-name "task-done.au" rbook-sounds-directory)
+  "Sound file to play when encoding process finishes.")
+
+(defvar rbook-encoding-progress-sound (expand-file-name "progress.au" rbook-sounds-directory)
+  "Sound file to play with progress messages.")
+
+
+;; TTS input requirements
 
 (defvar rbook-tts-coding-system 'cyrillic-koi8
   "Coding system accepted by the TTS program.")
@@ -154,29 +189,22 @@ These program should accept text on stdin and produce speech output.")
 (defvar rbook-tts-downcase-required t
   "Downcase text before sending it to the TTS program.")
 
-(defvar rbook-mp3-program "/usr/local/lib/rbook/mp3"
-  "Program used by rbook for producing audio book in MP3 format.
-These program should accept sound stream on stdin and produce an mp3-file.")
 
-(defvar rbook-sound-play-program "/usr/local/lib/rbook/play"
-  "Program used to play audio icons.")
-
-(defvar rbook-encoding-done-sound "/usr/local/lib/rbook/task-done.au"
-  "Sound file to play when encoding process finishes.")
-
-(defvar rbook-encoding-progress-sound "/usr/local/lib/rbook/progress.au"
-  "Sound file to play whith progress messages.")
+;; Helper functions
 
 (defun rbook-tts-args ()
-  "This function returns list of arguments for the TTS program."
+  "Construct arguments list for the TTS program."
   (let ((args (list
 	       "-v" (number-to-string rbook-speech-volume)
 	       "-p" (number-to-string rbook-speech-pitch)
 	       "-r" (number-to-string rbook-speech-rate)
 	       "-f" (number-to-string rbook-speech-sampling))))
-    (if rbook-collect-unknown-words
-	(cons "-l" args)
-      args)))
+    (when (and rbook-pronunciation-dictionary
+               (file-readable-p rbook-pronunciation-dictionary))
+      (nconc args (list "-d" rbook-pronunciation-dictionary)))
+    (when rbook-collect-unknown-words
+      (nconc args (list "-l" rbook-collect-unknown-words)))
+    args))
 
 (defun rbook-speak ()
   "Speak current buffer."
@@ -323,8 +351,7 @@ These program should accept sound stream on stdin and produce an mp3-file.")
   "Number of current output chunk or nil.")
 
 (defvar rbook-current-chunk-start-position 0.0
-  "Position in the produced sound stream
-where current output chunk has started.")
+  "Start position of current chunk in the produced sound stream.")
 
 (defvar rbook-tts-process nil
   "TTS process handle.")
@@ -333,16 +360,16 @@ where current output chunk has started.")
   "Sound encoding process handle.")
 
 (defvar rbook-exchange-buffer nil
-  "Buffer for processes communication.")
+  "Buffer for communication of processes.")
 
 (defvar rbook-encoding-process-ready nil
-  "Indicator of readiness of encoding process to accept input.")
+  "Indicates whether encoding process is ready to accept input.")
 
 (defvar rbook-switch-chunk nil
-  "Indicator of necessity of chunk switching.")
+  "Indicates whether to switch chunk.")
 
 (defvar rbook-split-enabled nil
-  "This flag indicates when splitting by chapter may be done.")
+  "Indicates when splitting by chapter may be done.")
 
 (defun rbook-read-sentence ()
   "Read current sentence and process it."
@@ -361,7 +388,7 @@ where current output chunk has started.")
     (goto-char end)))
 
 (defun rbook-output-file ()
-  "Returns current output file name."
+  "Return current output file name."
   (if rbook-current-output-chunk
       (format "%s%03d%s"
 	      rbook-output-path
@@ -370,7 +397,7 @@ where current output chunk has started.")
     rbook-output-path))
 
 (defun rbook-test-current-chunk-length ()
-  "Returns t if current output chunk exceeds time limit, nil otherwise."
+  "Return t if current output chunk exceeds time limit, nil otherwise."
   (>= (/ (- rbook-processed-amount rbook-current-chunk-start-position)
 	 rbook-speech-sampling)
       rbook-output-chunk-limit))
@@ -395,8 +422,8 @@ where current output chunk has started.")
 
 (defun rbook-run-tts-process (&optional silence)
   "Run TTS process for current buffer.
-If optional argument silence is supplied,
-this process will generate silence for given number of empty lines."
+If optional argument silence is supplied, this process will
+generate silence for given number of empty lines."
   (setq rbook-tts-process
 	(let ((process-connection-type nil))
 	  (apply 'start-process "rbook-tts" rbook-exchange-buffer
@@ -407,7 +434,7 @@ this process will generate silence for given number of empty lines."
 			    (* rbook-delay-factor
 			       (min silence rbook-delay-lines))))
 		   (rbook-tts-args)))))
-  (set-process-coding-system rbook-tts-process 'raw-text rbook-tts-coding-system)
+  (set-process-coding-system rbook-tts-process 'binary rbook-tts-coding-system)
   (set-process-sentinel
    rbook-tts-process
    (lambda (proc str)
@@ -482,7 +509,7 @@ this process will generate silence for given number of empty lines."
 			       (/ rbook-speech-sampling 1000.0))
 			 "-v" (number-to-string rbook-mp3-volume)
 			 file)))
-  (set-process-coding-system rbook-encoding-process 'raw-text 'raw-text)
+  (set-process-coding-system rbook-encoding-process 'binary 'binary)
   (set-process-sentinel
    rbook-encoding-process
    (lambda (proc str)
@@ -506,8 +533,7 @@ this process will generate silence for given number of empty lines."
   (setq rbook-encoding-process-ready t))
 
 (defun rbook-construct-output-path (need-split)
-  "Construct path to the output file or directory
-depending on necessity to split output."
+  "Construct path to the output file (or directory if NEED-SPLIT)."
   (let ((path (file-name-sans-extension
 	       (file-name-sans-extension (buffer-file-name)))))
     (if need-split
@@ -516,35 +542,36 @@ depending on necessity to split output."
 
 (defun rbook-make-audio-book (&optional split path)
   "Make sound files from the text in the current buffer from current position.
-If split argument is not `nil' then output will be split by separate chunks.
-In this case split denotes the number of the first chunk."
+If argument SPLIT is not nil then output will be split into separate chunks.
+In this case SPLIT denotes the number of the first chunk."
   (interactive
-   (let* ((default-chunk-number
-	    (number-to-string (or rbook-current-output-chunk 0)))
+   (let* ((default-chunk-number (or rbook-current-output-chunk 0))
 	  (need-split
 	   (and (y-or-n-p "Do you need to split output? ")
-		(string-to-number (read-string
-				   "First chunk number: "
-				   default-chunk-number
-				   nil
-				   default-chunk-number)))))
+                (read-number "First chunk number: " default-chunk-number)))
+          (path (rbook-construct-output-path need-split)))
      (list need-split
-	   (read-file-name "Where output should go? "
-			   nil (rbook-construct-output-path need-split)))))
+	   (read-file-name "Where output should go? " path path))))
   (when rbook-encoding-process
     (error "Can run only one such process at a time. Sorry"))
   (setq rbook-output-path
-	(or path
-	    (rbook-construct-output-path split)))
+        (expand-file-name (or path (rbook-construct-output-path split))))
   (if (not split)
       (setq rbook-output-path (directory-file-name rbook-output-path))
     (setq rbook-output-path (file-name-as-directory rbook-output-path))
     (unless (file-exists-p (directory-file-name rbook-output-path))
-      (make-directory rbook-output-path t)))
+      (make-directory rbook-output-path t))
+    (unless (file-directory-p rbook-output-path)
+      (error "Cannot create directory %s" rbook-output-path)))
+  (unless (file-writable-p rbook-output-path)
+    (error "Cannot write to %s" rbook-output-path))
   (setq rbook-current-output-chunk split)
   (setq rbook-split-enabled nil)
   (setq rbook-processing-buffer (current-buffer))
   (setq rbook-exchange-buffer (get-buffer-create " *rbook-exchange*"))
+  (with-current-buffer rbook-exchange-buffer
+    (erase-buffer)
+    (set-buffer-multibyte nil))
   (setq rbook-current-position (point))
   (setq rbook-processed-amount 0.0)
   (setq rbook-continue-encoding t)
@@ -553,7 +580,7 @@ In this case split denotes the number of the first chunk."
   (rbook-read-sentence)
   (setq rbook-current-position (point)))
 
-(defun rbook-read-text ()
+(defun rbook-read-here ()
   (interactive)
   (setq rbook-tts-function 'rbook-speak)
   (dtk-stop)
@@ -577,22 +604,27 @@ In this case split denotes the number of the first chunk."
 				 (line-beginning-position)))))
 	(setq start (point))))))
 
+(defvar rbook-last-bookmark nil)
 
-(defun rbook-read-bookmark (bmk)
+(defun rbook-read-from-bookmark (bmk)
   "Read text sentence by sentence by feeding it to the program
-specified by the variable `rbook-tts-program'. Before reading jump to
-the bookmark BMK. When called interactively and prefix argument is
-given, ask for BMK. Otherwise use `rbook-default-bookmark' as value."
+specified by the variable `rbook-tts-program'. Before reading
+jump to the bookmark BMK. When called interactively and prefix
+argument is given, ask for BMK. Otherwise use last read bookmark
+or `rbook-default-bookmark' as value."
   (interactive
-   (if current-prefix-arg
-       (bookmark-completing-read "Read from bookmark"
-				 rbook-default-bookmark)
-     (list rbook-default-bookmark)))
-  (setq rbook-default-bookmark bmk)
+   (progn
+     (bookmark-maybe-load-default-file)
+     (let ((default (or rbook-last-bookmark rbook-default-bookmark)))
+       (list
+        (if current-prefix-arg
+            (bookmark-completing-read "Read from bookmark" default)
+          default)))))
+  (setq rbook-last-bookmark bmk)
   (unless (string= bookmark-current-bookmark bmk)
     (bookmark-jump bmk))
   (unwind-protect
-      (rbook-read-text)
+      (rbook-read-here)
     (bookmark-set bmk)))
 
 

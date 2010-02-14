@@ -1,12 +1,12 @@
 
 ;; Rbook
-(autoload 'rbook-read-text "rbook" nil t)
-(autoload 'rbook-read-bookmark "rbook" nil t)
+(autoload 'rbook-read-here "rbook" nil t)
+(autoload 'rbook-read-from-bookmark "rbook" nil t)
 (autoload 'rbook-make-audio-book "rbook" nil t)
 (autoload 'rbook-show-time "rbook" nil t)
 (autoload 'rbook-customize "rbook" nil t)
-(global-set-key (kbd "C-c b") 'rbook-read-bookmark)
-(global-set-key (kbd "C-c r") 'rbook-read-text)
+(global-set-key (kbd "C-c b") 'rbook-read-from-bookmark)
+(global-set-key (kbd "C-c r") 'rbook-read-here)
 (global-set-key (kbd "C-c a") 'rbook-make-audio-book)
 (global-set-key (kbd "C-c t") 'rbook-show-time)
 (global-set-key (kbd "C-c c") 'rbook-customize)
@@ -15,5 +15,6 @@
 (define-key global-map [menu-bar tools RBOOK customize] '("Customize parameters" . rbook-customize))
 (define-key global-map [menu-bar tools RBOOK show-time] '("Show processed time" . rbook-show-time))
 (define-key global-map [menu-bar tools RBOOK make-audio-book] '("Make audio book" . rbook-make-audio-book))
-(define-key global-map [menu-bar tools RBOOK read-bookmark] '("Read text from bookmark" . rbook-read-bookmark))
-(define-key global-map [menu-bar tools RBOOK read-text] '("Read text from cursor" . rbook-read-text))
+(define-key global-map [menu-bar tools RBOOK read-from-bookmark]
+  '("Read text from bookmark" . rbook-read-from-bookmark))
+(define-key global-map [menu-bar tools RBOOK read-here] '("Read text from cursor" . rbook-read-here))

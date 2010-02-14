@@ -16,27 +16,27 @@ BITRATE=32
 VOLUME=1.0
 
 # Command line parsing:
-while test $1
-do case $1 in
-     -f) shift
-         FREQUENCY=$1
-         ;;
-     -b) shift
-         BITRATE=$1
-         ;;
-     -v) shift
-         VOLUME=$1
-         ;;
-      *) file=$1
-         ;;
-   esac
-   shift
+while test $1; do
+    case $1 in
+        -f) shift
+            FREQUENCY=$1
+            ;;
+        -b) shift
+            BITRATE=$1
+            ;;
+        -v) shift
+            VOLUME=$1
+            ;;
+        *) file=$1
+            ;;
+    esac
+    shift
 done
 
 exec 2>&1 >/dev/null
 
 # Use VBR
-# eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m --scale $VOLUME --vbr-new -V 0 --abr $BITRATE - $file
+# exec lame -S -r -s 16 --bitwidth 16 --signed -m m --scale "$VOLUME" --vbr-new -V 0 --abr "$BITRATE" - "$file"
 
 # For hardware players
-eval exec lame -S -r -s $FREQUENCY --bitwidth 8 -m m --scale $VOLUME -b $BITRATE -F -q 0 - $file
+exec lame -S -r -s 16 --bitwidth 16 -m m --scale "$VOLUME" -b "$BITRATE" -F -q 0 - "$file"

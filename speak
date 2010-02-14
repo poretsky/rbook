@@ -12,47 +12,52 @@
 # -f <value> defines treatment of sampling frequency in Hz.
 # -n -- Don't play generated sound stream.
 # Return it as a standard output instead.
-# -l -- Collect unknown words in /var/log/unknown.words.
+# -l <filename> -- Collect unknown words in specified file.
+# -d <filename> -- Use specified pronunciation dictionary.
 
-# Default values of speech parameters:
-VOLUME=0.8
-FREQUENCY=10300
-RATE=0.0
-PITCH=0.0
+# Variables initialization:
+pitch=
+rate=
+freq=
+dict=
+collect=
 
 # Commands to use for actual tasks accomplishing:
-sndgen='ru_tts -p $PITCH -r $RATE -s /usr/local/lib/ru_tts/lexicon'
-sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 -v $VOLUME - -t ossdsp -c 2 -w /dev/dsp'
-collect=""
+sndgen='ru_tts $pitch $rate $dict $collect'
+sndplay='aplay -q -t raw -f S8 -r $freq 2>/dev/null'
 
 # Command line parsing:
-while test $1
-do case $1 in
-     -s) shift
-         length=$1
-         sndgen='dd if=/dev/zero bs=`expr $FREQUENCY / 100` count=$length'
-         ;;
-     -v) shift
-         VOLUME=$1
-         ;;
-     -p) shift
-         PITCH=$1
-         ;;
-     -r) shift
-         RATE=$1
-         ;;
-     -f) shift
-         FREQUENCY=$1
-         ;;
-     -n) sndplay='sox -t raw -s -b -r $FREQUENCY -c 1 - -t raw -u -'
-         ;;
-     -l) collect="-l /var/log/unknown.words"
-         ;;
-      *) ;;
-   esac
-   shift
+while test $1; do
+    case $1 in
+        -s) shift
+            length=$1
+            sndgen='dd if=/dev/zero bs=`expr $freq / 100` count=$length'
+            ;;
+        -v) shift
+            VOLUME=$1
+            ;;
+        -p) shift
+            pitch="-p $1"
+            ;;
+        -r) shift
+            rate="-r $1"
+            ;;
+        -f) shift
+            freq=$1
+            ;;
+        -n) sndplay='sox -q -t raw -s -1 -r $freq - -t raw -s -2 -r 16000 -'
+            ;;
+        -l) shift
+            collect="-l $1"
+            ;;
+        -d) shift
+            dict="-s $1"
+            ;;
+        *) ;;
+    esac
+    shift
 done
 
 # Do the job.
 exec 2>/dev/null
-eval "exec $sndgen $collect | $sndplay"
+eval "exec $sndgen | $sndplay"
