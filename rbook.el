@@ -448,8 +448,6 @@ generate silence for given number of empty lines."
 	 (when (< (point-min) (point-max))
 	   (let ((start (point-min))
 		 (end (point-max)))
-             (when rbook-tts-downcase-required
-               (downcase-region start end))
 	     (process-send-region rbook-encoding-process start end)
 	     (setq rbook-processed-amount
 		   (+ rbook-processed-amount (float (- end start))))
