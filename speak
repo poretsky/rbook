@@ -18,13 +18,14 @@
 # Variables initialization:
 pitch=
 rate=
-freq=
+freq=10000
+volume=0.8
 dict=
 collect=
 
 # Commands to use for actual tasks accomplishing:
 sndgen='ru_tts $pitch $rate $dict $collect'
-sndplay='aplay -q -t raw -f S8 -r $freq 2>/dev/null'
+sndplay='| sox -t raw -s -1 -r $freq -v $volume - -t raw -s -2 -r $freq - | aplay -q -t raw -f S16 -r $freq'
 
 # Command line parsing:
 while test $1; do
@@ -34,7 +35,7 @@ while test $1; do
             sndgen='dd if=/dev/zero bs=`expr $freq / 100` count=$length'
             ;;
         -v) shift
-            VOLUME=$1
+            volume=$1
             ;;
         -p) shift
             pitch="-p $1"
@@ -45,7 +46,7 @@ while test $1; do
         -f) shift
             freq=$1
             ;;
-        -n) sndplay='sox -q -t raw -s -1 -r $freq - -t raw -s -2 -r 16000 -'
+        -n) sndplay=
             ;;
         -l) shift
             collect="-l $1"
@@ -60,4 +61,4 @@ done
 
 # Do the job.
 exec 2>/dev/null
-eval "exec $sndgen | $sndplay"
+eval "exec $sndgen $sndplay"
