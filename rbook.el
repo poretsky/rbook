@@ -171,7 +171,7 @@ These program should accept text on stdin and produce speech output.")
   "Program used by rbook for producing audio book in MP3 format.
 These program should accept sound stream on stdin and produce an mp3-file.")
 
-(defvar rbook-sound-play-program (expand-file-name "play" rbook-scripts-directory)
+(defvar rbook-sound-play-program "aplay"
   "Program used to play audio icons.")
 
 (defvar rbook-encoding-done-sound (expand-file-name "task-done.au" rbook-sounds-directory)
@@ -191,6 +191,11 @@ These program should accept sound stream on stdin and produce an mp3-file.")
 
 
 ;; Helper functions
+
+(defun rbook-play-sound (icon)
+  "Play a sound icon."
+  (call-process rbook-sound-play-program
+                nil 0 nil "-q" icon))
 
 (defun rbook-tts-args ()
   "Construct arguments list for the TTS program."
@@ -455,9 +460,7 @@ generate silence for given number of empty lines."
 	 (process-send-eof rbook-encoding-process))
        (unless rbook-current-output-chunk
 	 (when (rbook-test-current-chunk-length)
-	   (call-process rbook-sound-play-program
-			 nil 0 nil
-			 rbook-encoding-progress-sound)
+	   (rbook-play-sound rbook-encoding-progress-sound)
 	   (setq rbook-current-chunk-start-position rbook-processed-amount)
 	   (rbook-show-time))))
      (unless (buffer-live-p rbook-processing-buffer)
@@ -517,13 +520,9 @@ generate silence for given number of empty lines."
 	 (progn (setq rbook-current-output-chunk
 		      (1+ rbook-current-output-chunk))
 		(rbook-run-encoding-process (rbook-output-file))
-		(call-process rbook-sound-play-program
-			      nil 0 nil
-			      rbook-encoding-progress-sound)
+		(rbook-play-sound rbook-encoding-progress-sound)
 		(rbook-show-time))
-       (call-process rbook-sound-play-program
-		     nil 0 nil
-		     rbook-encoding-done-sound)
+       (rbook-play-sound rbook-encoding-done-sound)
        (kill-buffer rbook-exchange-buffer)
        (setq rbook-encoding-process nil)
        (message
