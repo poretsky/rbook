@@ -1,10 +1,10 @@
-;;; rbook.el --- reading text files
+;;; rbook.el --- Reading text files with speech synthesizer -*- coding: utf-8 -*-
 
 ;; Copyright (C) 2002  Dmitry V. Paduchikh
 
 ;; Author: Dmitry Paduchikh <paduch@imm.uran.ru>
 ;; Modified by Igor B. Poretsky <poretsky@mlbox.ru>
-;; Keywords: multimedia
+;; Keywords: Multimedia, Text reading, Speech
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
