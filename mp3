@@ -5,15 +5,16 @@
 # to mp3.
 #
 # -f <value> -- Sampling frequency of the original sound stream in kHz.
-# -b <value> -- Wanted bitrate.
+# -b <value> -- Average bitrate in VBR mode.
+# -c <value> -- Bitrate in CBR mode.
 # -v <value> -- Volume scale factor.
 
 # Output file name must be determined in the command line.
 
 # Clear variables:
 freq=10000
-bitrate=32
 volume=1.0
+bitrate=
 
 # Command line parsing:
 while test $1; do
@@ -22,7 +23,10 @@ while test $1; do
             freq=$1
             ;;
         -b) shift
-            bitrate=$1
+            bitrate="--vbr-new -V 0 --abr $1"
+            ;;
+        -c) shift
+            bitrate="-F -q 0 -b $1"
             ;;
         -v) shift
             volume=$1
@@ -35,8 +39,5 @@ done
 
 exec 2>&1 >/dev/null
 
-# Use VBR
-#exec sox -t raw -s -1 -r $freq - -t wav -2 -r 16000 - rabbit | lame -S -m m --scale "$volume" --vbr-new -V 0 --abr "$bitrate" - "$file"
-
-# For hardware players
-exec sox -t raw -s -1 -r $freq - -t wav -2 -r 16000 - rabbit | lame -m m --scale "$volume" -b "$bitrate" -F -q 0 - "$file"
+# Do the job
+exec sox -t raw -s -1 -r $freq - -t wav -2 -r 16000 - rabbit | lame -m m --scale "$volume" $bitrate - "$file"

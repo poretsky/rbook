@@ -109,10 +109,28 @@ how frequently the progress message should be displayed."
   :group 'rbook-audiobook
   :type 'regexp)
 
-(defcustom rbook-mp3-bitrate 32
+(defcustom rbook-mp3-bitrate '(nil . 32)
   "Encoding bitrate in kbps."
   :group 'rbook-audiobook
-  :type 'integer)
+  :type '(choice :value (nil . 32)
+                 (cons :tag "VBR"
+                       (const :tag "Variable bitrate" nil)
+                       (integer :tag "Average value as integer from 8 through 64" :match
+                                (lambda (widget value)
+                                  (and (wholenump value)
+                                       (>= value 8)
+                                       (<= value 64)))))
+                 (cons :tag "CBR"
+                       (const :tag "Constant bitrate" t)
+                       (radio :value 32 :tag "Available values"
+                              (const 8)
+                              (const 16)
+                              (const 24)
+                              (const 32)
+                              (const 40)
+                              (const 48)
+                              (const 56)
+                              (const 64)))))
 
 (defcustom rbook-mp3-volume 1.0
   "Volume scale factor for produced mp3-files."
@@ -417,7 +435,7 @@ These program should accept sound stream on stdin and produce an mp3-file.")
 
 (defun rbook-evaluate-size ()
   "Calculate size of produced sound files in kb."
-  (round (/ (* rbook-processed-amount rbook-mp3-bitrate)
+  (round (/ (* rbook-processed-amount (cdr rbook-mp3-bitrate))
 	    (* rbook-speech-sampling 8))))
 
 (defun rbook-show-time ()
@@ -505,7 +523,10 @@ generate silence for given number of empty lines."
 	(let ((process-connection-type nil))
 	  (start-process "rbook-encoding" nil
 			 rbook-mp3-program
-			 "-b" (number-to-string rbook-mp3-bitrate)
+                         (if (car rbook-mp3-bitrate)
+                             "-c"
+                           "-b")
+                         (number-to-string (cdr rbook-mp3-bitrate))
 			 "-f" (number-to-string rbook-speech-sampling)
 			 "-v" (number-to-string rbook-mp3-volume)
 			 file)))
