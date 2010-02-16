@@ -40,4 +40,4 @@ done
 exec 2>&1 >/dev/null
 
 # Do the job
-exec sox -t raw -s -1 -r $freq - -t wav -2 -r 16000 - rabbit | lame -m m --scale "$volume" $bitrate - "$file"
+exec sox -t raw -s -1 -r "$freq" -v "$volume" - -t wav -2 -r 16000 - rabbit | lame -m m $bitrate - "$file"
