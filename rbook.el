@@ -63,7 +63,7 @@ The greater value causes slower speech."
   :group 'rbook-speech
   :type 'number)
 
-(defcustom rbook-speech-sampling 10300
+(defcustom rbook-speech-sampling 10000
   "*How to treat generated speech sampling rate. In fact it doesn't affect
 actual sampling rate, but varying this value we can change playing speed."
   :group 'rbook-speech
