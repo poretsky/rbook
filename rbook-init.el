@@ -34,8 +34,7 @@
 (global-set-key (kbd "C-c c") 'rbook-customize)
 
 ;; Menu bindings:
-(setq rbook-menu (make-sparse-keymap "RBOOK"))
-(define-key global-map [menu-bar tools RBOOK] (cons "Book reader" rbook-menu))
+(define-key global-map [menu-bar tools RBOOK] (cons "Book reader" (make-sparse-keymap "RBOOK")))
 (define-key global-map [menu-bar tools RBOOK customize] '("Customize parameters" . rbook-customize))
 (define-key global-map [menu-bar tools RBOOK show-time] '("Show processed time" . rbook-show-time))
 (define-key global-map [menu-bar tools RBOOK make-audio-book] '("Make audio book" . rbook-make-audio-book))
