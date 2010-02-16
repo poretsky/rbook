@@ -10,22 +10,22 @@
 
 # Output file name must be determined in the command line.
 
-# Default parameters:
-FREQUENCY=10.3
-BITRATE=32
-VOLUME=1.0
+# Clear variables:
+freq=10000
+bitrate=32
+volume=1.0
 
 # Command line parsing:
 while test $1; do
     case $1 in
         -f) shift
-            FREQUENCY=$1
+            freq=$1
             ;;
         -b) shift
-            BITRATE=$1
+            bitrate=$1
             ;;
         -v) shift
-            VOLUME=$1
+            volume=$1
             ;;
         *) file=$1
             ;;
@@ -36,7 +36,7 @@ done
 exec 2>&1 >/dev/null
 
 # Use VBR
-# exec lame -S -r -s 16 --bitwidth 16 --signed -m m --scale "$VOLUME" --vbr-new -V 0 --abr "$BITRATE" - "$file"
+#exec sox -t raw -s -1 -r $freq - -t wav -2 -r 16000 - rabbit | lame -S -m m --scale "$volume" --vbr-new -V 0 --abr "$bitrate" - "$file"
 
 # For hardware players
-exec lame -S -r -s 16 --bitwidth 16 -m m --scale "$VOLUME" -b "$BITRATE" -F -q 0 - "$file"
+exec sox -t raw -s -1 -r $freq - -t wav -2 -r 16000 - rabbit | lame -m m --scale "$volume" -b "$bitrate" -F -q 0 - "$file"

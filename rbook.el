@@ -506,8 +506,7 @@ generate silence for given number of empty lines."
 	  (start-process "rbook-encoding" nil
 			 rbook-mp3-program
 			 "-b" (number-to-string rbook-mp3-bitrate)
-			 "-f" (number-to-string
-			       (/ rbook-speech-sampling 1000.0))
+			 "-f" (number-to-string rbook-speech-sampling)
 			 "-v" (number-to-string rbook-mp3-volume)
 			 file)))
   (set-process-coding-system rbook-encoding-process 'binary 'binary)
