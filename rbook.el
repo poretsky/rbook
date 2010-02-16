@@ -167,7 +167,10 @@ such as quotes, parentheses and so on."
 (defun rbook-customize ()
   "Customize Rbook parameters."
   (interactive)
-  (customize-group 'rbook))
+  (customize-group 'rbook)
+  (and (featurep 'emacspeak)
+       (interactive-p)
+       (emacspeak-auditory-icon 'open-object)))
 
 
 ;; File names and paths
@@ -598,9 +601,11 @@ In this case SPLIT denotes the number of the first chunk."
   (setq rbook-current-position (point)))
 
 (defun rbook-read-here ()
+  "Read text from cursor."
   (interactive)
   (setq rbook-tts-function 'rbook-speak)
-  (dtk-stop)
+  (when (featurep 'emacspeak)
+    (dtk-stop))
   (sleep-for 1)
   (push-mark nil t)
   (let ((sentence-end rbook-sentence-end)
