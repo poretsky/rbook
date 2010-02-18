@@ -1,0 +1,242 @@
+-*- mode: change-log -*-
+
+rbook 2.0
+
+2010-02-17  Igor B. Poretsky <poretsky@mlbox.ru>
+
+	* Fixed relationship with Emacspeak. Rbook happily coexists with
+	  Emacspeak, but does not require it in any aspect.
+
+2010-02-16  Igor B. Poretsky <poretsky@mlbox.ru>
+
+	* Adjust volume on the resampling stage to avoid possible
+	  distortion.
+
+	* Strict and elaborate mp3 bitrate customization. Variable bitrate
+	  can be used now as well as the fixed ones.
+
+	* Default to the ru_tts native sampling frequency.
+
+	* Comments revision.
+
+	* Recode Lame input into the wav format.
+
+2010-02-15  Igor B. Poretsky <poretsky@mlbox.ru>
+
+	* Restored volume control when reading that was broken by switching
+	  to aplay.
+
+	* Removed trivial script for playing sound icons. The aplay program
+	  is called from the elisp module instead.
+
+	* All Russian stuff recoded to utf8. Improved customization
+	  mechanism for rbook-pronunciation dictionary and
+	  rbook-collect-unknown-words.
+
+
+rbook 1.3.4
+
+2009-04-11  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Separate last read bookmark from rbook-default-bookmark.
+	We shouldn't keep changing value in customizable option.
+
+2009-04-11  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Ensure that bookmarks are loaded before calling rbook-read-from-bookmark
+
+
+rbook 1.3.3
+
+2009-04-10  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Rename rbook-read-bookmark to rbook-read-from-bookmark
+
+2009-04-10  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Rename rbook-read-text to rbook-read-here
+
+2009-04-10  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Check whether output file/directory exists and is writable
+
+2009-04-10  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Simplify interactive behavior of rbook-make-audio-book
+
+2009-04-10  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Rewrite a bit documentation strings.
+
+2009-04-10  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Change speak and mp3 scripts to work with normal lame.
+	Previously lame-ha was required in order to handle output of ru_tts
+	without external resampling programs. Now SoX is used to resample
+	sound stream from 10 kHz to 16 kHz.
+
+2009-04-10  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Added coding cookie to rbook.el
+
+
+rbook 1.3.2
+
+2009-04-08  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Fix interactive form in rbook-read-bookmark.
+	Earlier bookmark-completing-read used to return list with bookmark,
+	but now it returns only bookmark itself.
+
+2009-04-08  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Don't mention sox in README.txt
+
+2009-04-07  Dmitri Paduchikh  <dpaduchikh@gmail.com>
+
+	Use aplay instead of sox for playing
+
+2009-03-14  Igor B. Poretsky <poretsky@mlbox.ru>
+
+	* Fixed element type for chapter header pattern.
+
+
+rbook 1.3.1
+
+2008-08-24  Dmitri Paduchikh  <dpaduch@k66.ru>
+
+	* Changed version number to 1.3.1.
+
+	* Made changes to installation instructions in README.txt.
+
+	* Do not depend on hard-coded file names, instead initialize file
+	names using directory from which rbook was loaded.
+
+	* In rbook.el use coding system cyrillic-koi8 explicitly when
+	reading text. Make rbook-exchange-buffer, the buffer for processes
+	communication, an unibyte buffer. When communicating with
+	subprocesses while encoding use binary coding system rather than
+	raw-text.
+
+	* Added customizable variable rbook-pronunciation-dictionary so
+	that one can easily change location of stress dictionary used by
+	the script.
+
+	* Changed scripts speak and play in order to play sound through
+	ALSA rather than OSS. Also use command-line options -1 and -2 of
+	sox because sox 14 doesn't accept -b and -w anymore.
+
+2003-10-26  Igor B. Poretsky  <>
+
+	* rbook.el: Fixed reading from bookmark.
+
+2003-10-18  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el: Removed spare newlines at the end of messages.
+
+	* rbook.el: Cleaning text improvement. Part "Ö" and initials.
+
+2003-10-06  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* README.txt, default.el: Access via menu bar.
+
+2003-10-05  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el:
+	More precise counting of empty lines. Mostly affects splitting
+	mechanism. Use rbook-blank-space in rbook-read-text instead of literal
+	regexp.
+
+	* rbook.el:
+	Fixed a bug in the splitting by time logic. Synchronization of
+	processes was necessary.
+
+2003-10-02  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* README.txt:
+	Text requirements for audiobooks producing. A few words about
+	splitting mechanism.
+
+	* rbook.el: Added capability to split output by blank lines.
+
+2003-10-01  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el:
+	Inserting comma between numbers separated by spaces to prevent their
+	concatenation in speech.
+
+2003-09-28  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* README.txt: Added short description.
+
+	* rbook.el:
+	Enhanced logic of splitting by chapter: don't split sequences of
+	headings.
+
+2003-09-27  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el: Added Roman numerals parsing.
+
+	* rbook.el: Fixed a bug caused by renamings.
+
+2003-09-25  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* default.el: Added some autoloads and key definitions.
+
+	* mp3, rbook.el, speak:
+	Separate volume control for audiobook producing mode.
+
+	* rbook.el, speak: Control unknown words collecting via customization.
+
+	* rbook.el: Added customization mechanism. Some renamings.
+
+	* rbook.el:
+	Cleaning multiple dots which caused some text not to be read.
+
+2003-09-20  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el: Asterisk has been included in the set of non-pronunciable
+	punctuations.
+
+2003-09-19  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el:
+	Capability to eliminate pronunciation of punctuations: quotes and
+	parentheses.
+
+2003-09-18  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el: Don't treat dashes in digit sequences as hyphens.
+
+2003-09-17  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el:
+	Use temporary buffer for transferring text to the TTS engine.
+
+	* speak: Eliminated logging of unknown words.
+
+	* rbook.el: Fixed bug which prevented reading from arbitrary bookmark.
+
+	* mp3, play, progress.au, rbook.el, speak, task-done.au:
+	Added capability to produce audio books in MP3 format.
+
+2003-09-06  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el, speak: Added pitch control.
+
+2003-09-05  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el, speak:
+	Setting of speech parameters has been moved to the lisp level.
+
+	* rbook.el, speak:
+	No dependency of computer speed in silence generation. Some comments.
+
+2003-09-04  Igor B. Poretsky  <poretsky@mlbox.ru>
+
+	* rbook.el: Respect hyphenations.
+
+	* default.el, rbook.el, speak: New file.
+
+	* default.el, rbook.el, speak: Put under CVS control
+

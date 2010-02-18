@@ -1,0 +1,26 @@
+;; -*-emacs-lisp-*-
+;;
+;; Emacs startup file, e.g.  /etc/emacs/site-start.d/50rbook.el
+;; for the Debian rbook package
+;;
+;; Originally contributed by Nils Naumann <naumann@unileoben.ac.at>
+;; Modified by Dirk Eddelbuettel <edd@debian.org>
+;; Adapted for dh-make by Jim Van Zandt <jrv@debian.org>
+
+;; The rbook package follows the Debian/GNU Linux 'emacsen' policy and
+;; byte-compiles its elisp files for each 'emacs flavor' (emacs19,
+;; xemacs19, emacs20, xemacs20...).  The compiled code is then
+;; installed in a subdirectory of the respective site-lisp directory.
+;; We have to add this to the load-path:
+(let ((package-dir (concat "/usr/share/"
+                           (symbol-name flavor)
+                           "/site-lisp/rbook")))
+  ;; If package-dir does not exist, the rbook package must have
+  ;; removed but not purged, and we should skip the setup.
+  (when (file-directory-p package-dir)
+    (add-to-list 'load-path package-dir)
+    (setq
+     rbook-default-pronunciation-dictionary "/usr/share/freespeech/rulex.db"
+     rbook-scripts-directory "/usr/share/rbook/scripts/"
+     rbook-sounds-directory "/usr/share/rbook/sounds/")
+    (load-library "rbook-init")))

@@ -1,0 +1,4 @@
+*.el usr/share/emacs/site-lisp/rbook
+*.au usr/share/rbook/sounds
+speak usr/share/rbook/scripts
+mp3 usr/share/rbook/scripts

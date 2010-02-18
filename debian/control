@@ -1,0 +1,16 @@
+Source: rbook
+Section: text
+Priority: optional
+Maintainer: Igor B. Poretsky <poretsky@mlbox.ru>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.3
+
+Package: rbook
+Architecture: all
+Depends: emacs, alsa-utils, libsox-fmt-base, sox, ru-tts, ${misc:Depends}
+Recommends: lame
+Description: Read books in Emacs with synthesized voice
+ This program allows to read Russian texts in Emacs
+ with synthesized voice providing bookmarks support
+ and flexible customizations. With Lame package installed
+ it also can produce audiobooks in mp3 format.
