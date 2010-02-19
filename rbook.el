@@ -179,7 +179,7 @@ such as quotes, parentheses and so on."
   "Directory where helper scripts are placed.")
 
 (defvar rbook-sounds-directory (file-name-directory load-file-name)
-"Directory where sound icons are stored.")
+  "Directory where sound icons are stored.")
 
 (defvar rbook-output-files-extension ".mp3"
   "Extension to use for output files.")
