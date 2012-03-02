@@ -19,6 +19,9 @@
   ;; removed but not purged, and we should skip the setup.
   (when (file-directory-p package-dir)
     (add-to-list 'load-path package-dir)
+    ;; Make sure that the uncompiled files are also in the load-path, near the
+    ;; end.  This is for moving point to the code when view help.
+    (add-to-list 'load-path "/usr/share/emacs/site-lisp/rbook" t)
     (setq
      rbook-default-pronunciation-dictionary "/usr/share/freespeech/rulex.db"
      rbook-scripts-directory "/usr/share/rbook/scripts/"
