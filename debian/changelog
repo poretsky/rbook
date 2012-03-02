@@ -1,3 +1,10 @@
+rbook (2.2) unstable; urgency=low
+
+  * Source directory added to the load path to allow source access
+    from help screens.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Fri, 02 Mar 2012 21:51:35 +0400
+
 rbook (2.1) unstable; urgency=low
 
   * Dependencies corrected according to the Debian policy for Emacs
