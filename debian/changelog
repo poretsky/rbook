@@ -1,3 +1,10 @@
+rbook (2.3) unstable; urgency=low
+
+  * Workaround to deal with complicated file names.
+  * Added debian package notes.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Sun, 11 Mar 2012 00:44:56 +0400
+
 rbook (2.2) unstable; urgency=low
 
   * Source directory added to the load path to allow source access
