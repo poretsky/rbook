@@ -10,7 +10,7 @@ Architecture: all
 Depends: emacs | emacsen, alsa-utils, libsox-fmt-base, sox, ru-tts, ${misc:Depends}
 Recommends: lame
 Description: Read books in Emacs with synthesized voice
- This program allows to read Russian texts in Emacs
+ This program allows one to read Russian texts in Emacs
  with synthesized voice providing bookmarks support
  and flexible customizations. With Lame package installed
  it also can produce audiobooks in mp3 format.
