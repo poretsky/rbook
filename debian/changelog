@@ -1,3 +1,13 @@
+rbook (2.4.0precise1) precise; urgency=low
+
+  * Per distribution build.
+  * Sound dithering is explicitly turned off to get rid of pretty boring
+    noise.
+  * Lintian complaints satisfied.
+  * Bumped standards version to 3.9.3.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Tue, 09 Oct 2012 07:00:22 +0400
+
 rbook (2.3) unstable; urgency=low
 
   * Workaround to deal with complicated file names.
