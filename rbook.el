@@ -104,7 +104,7 @@ how frequently the progress message should be displayed."
   :group 'rbook-audiobook
   :type 'integer)
 
-(defcustom rbook-chapter-regexp "[ \f\t]*\\(ГЛАВА[ \f\t]+\\)?[0-9.]+\\(\\w*[ \f\t!-?]*\\)*"
+(defcustom rbook-chapter-regexp "^[ \t]*\\(\\(ГЛАВА\\|Глава\\)?[ \t]+\\)?\\([0-9]+\\|[CILVX]+\\)\\.?\\([ \t]\\|$\\)"
   "Regexp to match chapter header."
   :group 'rbook-audiobook
   :type 'regexp)
@@ -229,7 +229,7 @@ These program should accept sound stream on stdin and produce an mp3-file.")
                (file-readable-p rbook-pronunciation-dictionary))
       (nconc args (list "-d" rbook-pronunciation-dictionary)))
     (when rbook-collect-unknown-words
-      (nconc args (list "-l" rbook-collect-unknown-words)))
+      (nconc args (list "-l" (expand-file-name rbook-collect-unknown-words))))
     args))
 
 (defun rbook-speak ()
@@ -473,10 +473,6 @@ generate silence for given number of empty lines."
 	     (setq rbook-processed-amount
 		   (+ rbook-processed-amount (float (- end start))))
 	     (delete-region start end))))
-       (when rbook-switch-chunk
-	 (setq rbook-switch-chunk nil)
-	 (setq rbook-encoding-process-ready nil)
-	 (process-send-eof rbook-encoding-process))
        (unless rbook-current-output-chunk
 	 (when (rbook-test-current-chunk-length)
 	   (rbook-play-sound rbook-encoding-progress-sound)
@@ -507,10 +503,11 @@ generate silence for given number of empty lines."
 					 (rbook-test-current-chunk-length))))
 		       (setq rbook-switch-chunk t))
 		     (setq rbook-split-enabled t)))
-		 (rbook-run-tts-process
-		  (if rbook-switch-chunk
-		      rbook-delay-lines
-		    blank)))
+                 (if rbook-switch-chunk
+                     (progn
+                       (setq rbook-switch-chunk nil)
+                       (process-send-eof rbook-encoding-process))
+                   (rbook-run-tts-process blank)))
 	     (rbook-read-sentence))
 	   (setq rbook-current-position (point)))
        (process-send-eof rbook-encoding-process))))
@@ -537,10 +534,12 @@ generate silence for given number of empty lines."
   (set-process-sentinel
    rbook-encoding-process
    (lambda (proc str)
+     (setq rbook-encoding-process-ready nil)
      (if (and rbook-continue-encoding rbook-current-output-chunk)
 	 (progn (setq rbook-current-output-chunk
 		      (1+ rbook-current-output-chunk))
 		(rbook-run-encoding-process (rbook-output-file))
+                (rbook-run-tts-process rbook-delay-lines)
 		(rbook-play-sound rbook-encoding-progress-sound)
 		(rbook-show-time))
        (rbook-play-sound rbook-encoding-done-sound)
@@ -565,13 +564,15 @@ generate silence for given number of empty lines."
 If argument SPLIT is not nil then output will be split into separate chunks.
 In this case SPLIT denotes the number of the first chunk."
   (interactive
-   (let* ((default-chunk-number (or rbook-current-output-chunk 0))
-	  (need-split
-	   (and (y-or-n-p "Do you need to split output? ")
-                (read-number "First chunk number: " default-chunk-number)))
-          (path (rbook-construct-output-path need-split)))
-     (list need-split
-	   (read-file-name "Where output should go? " path path))))
+   (let* ((need-split (y-or-n-p "Do you need to split output? "))
+          (default-path (rbook-construct-output-path need-split))
+          (path (read-file-name "Where output should go? " default-path default-path))
+          (first-chunk-number (and need-split
+                                   (read-number "First chunk number: "
+                                                (or (and (file-exists-p (directory-file-name (expand-file-name path)))
+                                                         rbook-current-output-chunk)
+                                                    0)))))
+     (list first-chunk-number path)))
   (when rbook-encoding-process
     (error "Can run only one such process at a time. Sorry"))
   (setq rbook-output-path
@@ -587,6 +588,7 @@ In this case SPLIT denotes the number of the first chunk."
     (error "Cannot write to %s" rbook-output-path))
   (setq rbook-current-output-chunk split)
   (setq rbook-split-enabled nil)
+  (setq rbook-switch-chunk nil)
   (setq rbook-processing-buffer (current-buffer))
   (setq rbook-exchange-buffer (get-buffer-create " *rbook-exchange*"))
   (with-current-buffer rbook-exchange-buffer
