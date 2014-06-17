@@ -1,3 +1,9 @@
+rbook (2.4.2precise1) precise; urgency=low
+
+  * Fixed multipart audiobooks production.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Tue, 17 Jun 2014 23:21:44 +0400
+
 rbook (2.4.1precise1) precise; urgency=low
 
   * Source directory is now not included into the load path, but
