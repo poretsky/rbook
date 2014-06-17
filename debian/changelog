@@ -1,3 +1,9 @@
+rbook (2.4.2lucid1) lucid; urgency=low
+
+  * Fixed multipart audiobooks production.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Tue, 17 Jun 2014 23:19:45 +0400
+
 rbook (2.4.1lucid1) lucid; urgency=low
 
   * Source directory is now not included into the load path, but
