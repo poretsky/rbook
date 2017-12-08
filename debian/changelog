@@ -1,3 +1,18 @@
+rbook (2.4.2stretch1) stretch; urgency=low
+
+  * Per distribution build.
+  * Debhelper compatibility level fix.
+  * Bumped standards version to 3.9.8.
+  * Lintian complaints satisfied.
+  * Sound dithering is explicitly turned off to get rid of pretty boring
+    noise.
+  * Source directory is now not included into the load path, but
+    symlinks to the source files are preserved to make them available
+    from help view.
+  * Fixed multipart audiobooks production.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Sat, 09 Dec 2017 01:21:33 +0300
+
 rbook (2.3) unstable; urgency=low
 
   * Workaround to deal with complicated file names.
