@@ -1,3 +1,10 @@
+rbook (2.4.2stretch2) stretch; urgency=low
+
+  * Added emacsen-compat file to prevent an error message during
+    installation.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Wed, 21 Feb 2018 20:00:45 +0300
+
 rbook (2.4.2stretch1) stretch; urgency=low
 
   * Per distribution build.
