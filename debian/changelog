@@ -1,3 +1,10 @@
+rbook (2.4.2xenial2) xenial; urgency=low
+
+  * Added emacsen-compat file to prevent an error message during
+    installation.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Wed, 21 Feb 2018 19:57:13 +0300
+
 rbook (2.4.2xenial1) xenial; urgency=low
 
   * Per distribution build.
