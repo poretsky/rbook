@@ -4,18 +4,22 @@
 FLAVOR=$1
 PACKAGE=rbook
 
-if [ ${FLAVOR} = emacs ]; then exit 0; fi
-
 echo install/${PACKAGE}: Handling install for emacsen flavor ${FLAVOR}
 
-FLAVORTEST=`echo $FLAVOR | cut -c-6`
-if [ ${FLAVORTEST} = xemacs ] ; then
-    SITEFLAG="-no-site-file"
-else
-    SITEFLAG="--no-site-file"
-fi
-FLAGS="${SITEFLAG} -q -batch -l path.el -f batch-byte-compile"
+case "$FLAVOR" in
+    xemacs*)
+        SITEFLAG="-no-site-file"
+        ;;
+    emacs*)
+        SITEFLAG="--no-site-file"
+        ;;
+    *)
+        echo "unknown flavor $FLAVOR, does not start with emacs or xemacs"
+	exit 1
+        ;;
+esac
 
+FLAGS="${SITEFLAG} -q -batch -l path.el -f batch-byte-compile"
 ELDIR=/usr/share/emacs/site-lisp/${PACKAGE}
 ELCDIR=/usr/share/${FLAVOR}/site-lisp/${PACKAGE}
 
@@ -23,9 +27,12 @@ install -m 755 -d ${ELCDIR}
 cd ${ELDIR}
 src=`echo *.el`
 cd ${ELCDIR}
-for file in $src
-do ln -s ../../../emacs/site-lisp/${PACKAGE}/$file
-done
+
+if [ ${FLAVOR} != emacs ]; then
+    for file in $src
+    do ln -s ../../../emacs/site-lisp/${PACKAGE}/$file
+    done
+fi
 
 cat << EOF > path.el
 (setq load-path (cons "." load-path) byte-compile-warnings nil)
