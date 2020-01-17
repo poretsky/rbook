@@ -3,7 +3,7 @@ Section: text
 Priority: optional
 Maintainer: Igor B. Poretsky <poretsky@mlbox.ru>
 Build-Depends: debhelper (>= 9)
-Standards-Version: 3.9.3
+Standards-Version: 4.1.4
 
 Package: rbook
 Architecture: all
