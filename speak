@@ -25,7 +25,7 @@ collect=
 
 # Commands to use for actual tasks accomplishing:
 sndgen='ru_tts $pitch $rate $dict $collect'
-sndplay='| sox -G -D -t raw -s -1 -r $freq -v $volume - -t raw -s -2 -r $freq - | aplay -q -t raw -f S16 -r $freq'
+sndplay='| sox -G -D -t raw -e signed-integer -b 8 -r $freq -c 1 -v $volume - -t raw -e signed-integer -b 16 -r $freq - | aplay -q -t raw -f S16 -r $freq'
 
 # Command line parsing:
 while test $1; do
