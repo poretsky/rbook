@@ -1,3 +1,9 @@
+rbook (2.4.2stretch3) stretch; urgency=low
+
+  * Sox compatibility fix.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Sun, 19 Jan 2020 10:50:00 +0300
+
 rbook (2.4.2stretch2) stretch; urgency=low
 
   * Added emacsen-compat file to prevent an error message during
