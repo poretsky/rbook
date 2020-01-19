@@ -1,3 +1,9 @@
+rbook (2.4.2bionic2) bionic; urgency=high
+
+  * Sox compatibility fix.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Sun, 19 Jan 2020 10:58:10 +0300
+
 rbook (2.4.2bionic1) bionic; urgency=low
 
   * Per distribution build.
