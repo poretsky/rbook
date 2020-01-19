@@ -1,3 +1,9 @@
+rbook (2.4.2buster2) buster; urgency=high
+
+  * Sox compatibility fix.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Sun, 19 Jan 2020 11:01:17 +0300
+
 rbook (2.4.2buster1) buster; urgency=low
 
   * Per distribution build.
