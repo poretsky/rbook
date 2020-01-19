@@ -1,3 +1,9 @@
+rbook (2.4.2xenial3) xenial; urgency=low
+
+  * Sox compatibility fix.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Sun, 19 Jan 2020 10:52:31 +0300
+
 rbook (2.4.2xenial2) xenial; urgency=low
 
   * Added emacsen-compat file to prevent an error message during
