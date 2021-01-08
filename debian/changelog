@@ -1,3 +1,19 @@
+rbook (2.4.2focal1) focal; urgency=low
+
+  * Per distribution build.
+  * Debhelper compatibility level fix.
+  * Bumped standards version to 4.1.4.
+  * Most lintian complaints satisfied.
+  * Sound dithering is explicitly turned off to get rid of pretty boring
+    noise.
+  * Source directory is now not included into the load path, but
+    symlinks to the source files are preserved to make them available
+    from help view.
+  * Fixed multipart audiobooks production.
+  * Fixed byte-compilation with flavor emacs with newer emacs version.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Fri, 08 Jan 2021 09:41:24 +0300
+
 rbook (2.3) unstable; urgency=low
 
   * Workaround to deal with complicated file names.
