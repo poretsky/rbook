@@ -1,3 +1,9 @@
+rbook (2.5.0trusty1) trusty; urgency=medium
+
+  * Interphrase gap control facility.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Thu, 05 Aug 2021 08:28:22 +0300
+
 rbook (2.4.2trusty2) trusty; urgency=low
 
   * Added emacsen-compat file to prevent an error message during
