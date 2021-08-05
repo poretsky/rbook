@@ -1,3 +1,9 @@
+rbook (2.5.0focal1) focal; urgency=medium
+
+  * Interphrase gap control facility.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Thu, 05 Aug 2021 08:18:15 +0300
+
 rbook (2.4.2focal1) focal; urgency=low
 
   * Per distribution build.
