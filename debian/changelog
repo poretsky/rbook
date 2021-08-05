@@ -1,3 +1,9 @@
+rbook (2.5.0buster1) buster; urgency=medium
+
+  * Interphrase gap control facility.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Thu, 05 Aug 2021 08:15:30 +0300
+
 rbook (2.4.2buster2) buster; urgency=high
 
   * Sox compatibility fix.
