@@ -18,13 +18,14 @@
 # Variables initialization:
 pitch=
 rate=
+gaplen=
 freq=10000
 volume=0.8
 dict=
 collect=
 
 # Commands to use for actual tasks accomplishing:
-sndgen='ru_tts $pitch $rate $dict $collect'
+sndgen='ru_tts $pitch $rate $gaplen $dict $collect'
 sndplay='| sox -G -D -t raw -e signed-integer -b 8 -r $freq -c 1 -v $volume - -t raw -e signed-integer -b 16 -r $freq - | aplay -q -t raw -f S16 -r $freq'
 
 # Command line parsing:
@@ -53,6 +54,9 @@ while test $1; do
             ;;
         -d) shift
             dict="-s $1"
+            ;;
+        -g) shift
+            gaplen="-g $1"
             ;;
         *) ;;
     esac
