@@ -1,3 +1,9 @@
+rbook (2.5.0xenial1) xenial; urgency=medium
+
+  * Interphrase gap control facility.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Thu, 05 Aug 2021 08:32:30 +0300
+
 rbook (2.4.2xenial3) xenial; urgency=low
 
   * Sox compatibility fix.
