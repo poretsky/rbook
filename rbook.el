@@ -63,6 +63,12 @@ The greater value causes slower speech."
   :group 'rbook-speech
   :type 'number)
 
+(defcustom rbook-speech-interphrase-gap 0.8
+  "Relative interphrase gap duration.
+Reasonable values range from 0.0 to 1.0."
+  :group 'rbook-speech
+  :type 'number)
+
 (defcustom rbook-speech-sampling 10000
   "*How to treat generated speech sampling rate. In fact it doesn't affect
 actual sampling rate, but varying this value we can change playing speed."
@@ -224,6 +230,7 @@ These program should accept sound stream on stdin and produce an mp3-file.")
 	       "-v" (number-to-string rbook-speech-volume)
 	       "-p" (number-to-string rbook-speech-pitch)
 	       "-r" (number-to-string rbook-speech-rate)
+	       "-g" (number-to-string rbook-speech-interphrase-gap)
 	       "-f" (number-to-string rbook-speech-sampling))))
     (when (and rbook-pronunciation-dictionary
                (file-readable-p rbook-pronunciation-dictionary))
