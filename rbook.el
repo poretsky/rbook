@@ -51,21 +51,22 @@ For audio book producing this parameter has no effect."
   :group 'rbook-speech
   :type 'number)
 
-(defcustom rbook-speech-pitch 0.0
-  "Generated speech pitch. Reasonable values range from 0.0 to 1.0.
+(defcustom rbook-speech-pitch 1.0
+  "Generated speech pitch. Reasonable values range from 0.5 to 3.0.
 The greater value causes higher pitch."
   :group 'rbook-speech
   :type 'number)
 
-(defcustom rbook-speech-rate 0.5
-  "Generated speech rate. Reasonable values range from 0.0 to 1.0.
-The greater value causes slower speech."
+(defcustom rbook-speech-rate 1.0
+  "Generated speech rate. Reasonable values range from 0.4 to 2.5.
+The greater value causes quicker speech."
   :group 'rbook-speech
   :type 'number)
 
-(defcustom rbook-speech-interphrase-gap 0.8
+(defcustom rbook-speech-interphrase-gap 1.0
   "Relative interphrase gap duration.
-Reasonable values range from 0.0 to 1.0."
+Reasonable values range from 0.0 to 3.0 at the normal speech rate.
+The upper boundary proportionally depends on speech rate."
   :group 'rbook-speech
   :type 'number)
 
