@@ -7,7 +7,7 @@ Standards-Version: 4.3.0
 
 Package: rbook
 Architecture: all
-Depends: emacs | emacsen, alsa-utils, libsox-fmt-base, sox, ru-tts (>= 5.1), ${misc:Depends}
+Depends: emacs | emacsen, alsa-utils, libsox-fmt-base, sox, ru-tts (>= 6.0), ${misc:Depends}
 Recommends: lame
 Description: Read books in Emacs with synthesized voice
  This program allows one to read Russian texts in Emacs
