@@ -1,3 +1,9 @@
+rbook (2.6.0buster1) buster; urgency=medium
+
+  * Ru_tts 6.0 compatibility.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Fri, 20 Aug 2021 23:41:18 +0300
+
 rbook (2.5.0buster1) buster; urgency=medium
 
   * Interphrase gap control facility.
