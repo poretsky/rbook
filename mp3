@@ -40,4 +40,4 @@ done
 exec 2>&1 >/dev/null
 
 # Do the job
-exec sox -G -D -t raw -s -1 -r "$freq" -v "$volume" - -t wav -2 -r 16000 - rate | lame -m m $bitrate - "$file"
+exec sox -G -D -t raw -e signed-integer -b 8 -r "$freq" -v "$volume" - -t wav -b 16 -r 16000 - rate | lame -m m $bitrate - "$file"

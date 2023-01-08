@@ -1,3 +1,9 @@
+rbook (2.6.0jammy1) jammy; urgency=medium
+
+  * Release for Ubuntu Jammy.
+
+ -- Igor B. Poretsky <poretsky@mlbox.ru>  Sun, 08 Jan 2023 12:19:40 +0300
+
 rbook (2.3) unstable; urgency=low
 
   * Workaround to deal with complicated file names.
